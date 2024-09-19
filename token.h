@@ -9,43 +9,65 @@ using namespace std;
 
 enum Names
 {
-    UNDEF,           // 0
-    ID,              // 1
-    IF,              // 2
-    ELSE,            // 3
-    THEN,            // 4
-    RELOP,           // 5
-    EQ,              // 6
-    NE,              // 7
-    GT,              // 8
-    GE,              // 9
-    LT,              // 10
-    LE,              // 11
-    NUMBER,          // 12
-    DOUBLE_LITERAL,  // 13
-    FLOAT_LITERAL,   // 14
-    INTEGER_LITERAL, // 15
-    END_OF_FILE      // 16
+        UNDEF, //0
+    //Nomes e atributos dos tokens da linguagem
+    ID,       //1 - letter (letter | digit | _ )∗
+    INTERGER, //2 - [0-9]+
+    CHAR,     //3 -  ‘ch’ | ‘\n’ | ‘\0’, ch é qualquer caractere ASCI exceto \ e aspas simples
+    STRING,   //4 - “(ch)*”, ch é qualquer caractere ASCI exceto aspas duplas e \n 
+    OP,       // Operadores
+    PLUS,     //5 - +
+    MINUS,    //6 - -
+    MULT,     //7 - *
+    DIV,      //8 - /
+    RELOP,    // Operadores relacionais
+    EQUAL,    //9 - =
+    EQ_COM,   //10 - ==
+    DIF,      //11 - !=
+    LE,       //12 - <=
+    LT,       //13 - <
+    GE,       //14 - >=
+    GT,       //15 - >
+    AND,      //16 - &&
+    OR,       //17 - ||
+    NOT,      //18 - !
+    SEP,      // Separadores
+    PE,       //19 - (
+    PD,       //20 - )
+    BE,       // 21 - {
+    BD,       //22 - }
+    CE,       //23 - [
+    CD,       //24 - ]
+    VIRGULA,  //25 - ,
+    PONTO_VIGULA, //25 - ;
+    END_OF_FILE
 };
 
 class Token
 {
-public:
-    int name;
-    int attribute;
-    string lexeme;
+    public: 
+        int name;
+        int attribute;
+        string lexeme;
+    
+        Token(int name)
+        {
+            this->name = name;
+            attribute = UNDEF;
+        }
 
-    Token(int name)
-    {
-        this->name = name;
-        attribute = UNDEF;
-    }
-
-    Token(int name, int attr)
-    {
-        this->name = name;
-        attribute = attr;
-    }
+        Token(int name, string l)
+        {
+            this->name = name;
+            attribute = UNDEF;
+            lexeme = l;
+        }
+        
+        Token(int name, int attr)
+        {
+            this->name = name;
+            attribute = attr;
+        }
 };
 
 #endif // TOKEN_H

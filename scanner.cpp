@@ -39,7 +39,7 @@ Token *Scanner::nextToken()
             else if (isspace(input[pos]))
                 state = 23;
             else
-                lexicalError();
+                //lexicalError();
             // TO BE CONTINUED
 
             pos++;
@@ -63,7 +63,7 @@ Token *Scanner::nextToken()
             return tok;
 
         case 3: // NE
-            tok = new Token(RELOP, NE);
+            tok = new Token(RELOP, DIF);
 
             return tok;
 
@@ -73,7 +73,7 @@ Token *Scanner::nextToken()
             return tok;
 
         case 5: // EQ
-            tok = new Token(RELOP, EQ);
+            tok = new Token(RELOP, EQUAL);
 
             return tok;
 
@@ -133,7 +133,7 @@ Token *Scanner::nextToken()
                 pos++;
             }
             else
-                lexicalError();
+                //lexicalError();
 
             break;
 
@@ -153,7 +153,7 @@ Token *Scanner::nextToken()
             else if (isdigit(input[pos]))
                 state = 18;
             else
-                lexicalError();
+                //lexicalError();
 
             pos++;
 
@@ -166,7 +166,7 @@ Token *Scanner::nextToken()
                 pos++;
             }
             else
-                lexicalError();
+                //lexicalError();
 
             break;
 
@@ -178,22 +178,8 @@ Token *Scanner::nextToken()
 
             break;
 
-        case 19:
-            tok = new Token(NUMBER, DOUBLE_LITERAL);
-
-            pos--;
-
-            return tok;
-
         case 20:
-            tok = new Token(NUMBER, INTEGER_LITERAL);
-
-            pos--;
-
-            return tok;
-
-        case 21:
-            tok = new Token(NUMBER, FLOAT_LITERAL);
+            tok = new Token(INTERGER);
 
             pos--;
 
@@ -214,12 +200,12 @@ Token *Scanner::nextToken()
             break;
 
         default:
-            lexicalError();
+            //lexicalError();
         }
     }
 } // Fim nextToken
 
-void Scanner::lexicalError()
+void Scanner::lexicalError(string)
 {
     cout << "Token mal formatado\n";
     // Mostrando aviso de erro com a posição do erro e o caractere que causou o erro na cor vermelha
