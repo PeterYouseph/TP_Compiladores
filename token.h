@@ -12,7 +12,7 @@ enum Names
     UNDEF, //0
     //Nomes e atributos dos tokens da linguagem
     ID,       //1 - letter (letter | digit | _ )∗
-    INTERGER, //2 - [0-9]+
+    INTEGER, //2 - [0-9]+
     CHAR,     //3 -  ‘ch’ | ‘\n’ | ‘\0’, ch é qualquer caractere ASCI exceto \ e aspas simples
     STRING,   //4 - “(ch)*”, ch é qualquer caractere ASCI exceto aspas duplas e \n 
     OP,       // Operadores
@@ -39,7 +39,7 @@ enum Names
     CE,       //23 - [
     CD,       //24 - ]
     VIRGULA,  //25 - ,
-    PONTO_VIGULA, //25 - ;
+    PONTO_VIGULA, //26 - ;
     END_OF_FILE
 };
 
@@ -69,5 +69,32 @@ class Token
             attribute = attr;
         }
 };
+
+// Construtor padrão de Token (sem parâmetros)
+Token() : name(UNDEF), attribute(UNDEF), lexeme("") {}
+
+// Construtor com name e lexeme (ID, CHAR, STRING)
+Token(int name, string lexeme = "")
+{
+    this->name = name;
+    this->attribute = UNDEF;
+    this->lexeme = lexeme;
+}
+
+// Construtor com name e attribute (INTEGER, OP, RELOP, SEP)
+Token(int name, int attr)
+{
+    this->name = name;
+    this->attribute = attr;
+    this->lexeme = "";
+}
+
+~Token() {} // Destrutor padrão de Token (Para evitar vazamento de memória)
+
+string toString() const // Método que retorna uma string com as informações do token (Name, Attribute e Lexeme)
+{
+    return "Token(Name: " + to_string(name) + ", Attribute: " + to_string(attribute) + ", Lexeme: " + lexeme + ")";
+}
+
 
 #endif // TOKEN_H
