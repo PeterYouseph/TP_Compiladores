@@ -3,17 +3,22 @@
 
 string *vet;
 
+
 void print(Token *);
 void allocVetor();
 void freeVetor();
 
 int main(int argc, char *argv[])
 {
-    string input;
+    if (argc != 2)
+    {
+        cout << "Uso: ./compiler nome_arquivo.mj\n";
+        return 1;
+    }
 
-    getline(cin, input);
+    //getline(cin, input);
 
-    Scanner *scanner = new Scanner(input);
+    Scanner* scanner = new Scanner(argv[1]);
 
     allocVetor();
 
@@ -33,6 +38,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+
+// Acrescentar os vetores dos demais token
 void allocVetor()
 {
     vet = new string[17];

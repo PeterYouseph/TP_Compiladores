@@ -9,7 +9,7 @@ using namespace std;
 
 enum Names
 {
-        UNDEF, //0
+    UNDEF, //0
     //Nomes e atributos dos tokens da linguagem
     ID,       //1 - letter (letter | digit | _ )∗
     INTERGER, //2 - [0-9]+
