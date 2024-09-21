@@ -42,25 +42,35 @@ int main(int argc, char *argv[])
 // Acrescentar os vetores dos demais token
 void allocVetor()
 {
-    vet = new string[17];
+    vet = new string[27]; // Ajustado para 27 tokens
 
     vet[0] = "UNDEF";            // 0
     vet[1] = "ID";               // 1
-    vet[2] = "IF";               // 2
-    vet[3] = "ELSE";             // 3
-    vet[4] = "THEN";             // 4
-    vet[5] = "RELOP";            // 5
-    vet[6] = "EQ";               // 6
-    vet[7] = "NE";               // 7
-    vet[8] = "GT";               // 8
-    vet[9] = "GE";               // 9
-    vet[10] = "LT";              // 10
-    vet[11] = "LE";              // 11
-    vet[12] = "NUMBER";          // 12
-    vet[13] = "DOUBLE_LITERAL";  // 13
-    vet[14] = "FLOAT_LITERAL";   // 14
-    vet[15] = "INTEGER_LITERAL"; // 15
-    vet[16] = "END_OF_FILE";     // 16
+    vet[2] = "INTEGER";          // 2
+    vet[3] = "CHAR";             // 3
+    vet[4] = "STRING";           // 4
+    vet[5] = "PLUS";             // 5
+    vet[6] = "MINUS";            // 6
+    vet[7] = "MULT";             // 7
+    vet[8] = "DIV";              // 8
+    vet[9] = "EQUAL";            // 9
+    vet[10] = "EQ_COM";          // 10
+    vet[11] = "DIF";             // 11
+    vet[12] = "LE";              // 12
+    vet[13] = "LT";              // 13
+    vet[14] = "GE";              // 14
+    vet[15] = "GT";              // 15
+    vet[16] = "AND";             // 16
+    vet[17] = "OR";              // 17
+    vet[18] = "NOT";             // 18
+    vet[19] = "PE";              // 19
+    vet[20] = "PD";              // 20
+    vet[21] = "BE";              // 21
+    vet[22] = "BD";              // 22
+    vet[23] = "CE";              // 23
+    vet[24] = "CD";              // 24
+    vet[25] = "VIRGULA";         // 25
+    vet[26] = "PONTO_VIGULA";    // 26
 }
 
 void freeVetor()
@@ -70,10 +80,11 @@ void freeVetor()
 
 void print(Token *t)
 {
-    cout << vet[t->name];
+    // cout << vet[t->name];
 
-    if (t->attribute != UNDEF)
-        cout << "(" << vet[t->attribute] << ")";
+    // if (t->attribute != UNDEF)
+    //     cout << "(" << vet[t->attribute] << ")";
 
-    cout << " ";
+    // cout << " ";
+    cout << t->toString() << endl;
 }
