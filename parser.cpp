@@ -1,7 +1,7 @@
 // parser.cpp
 #include "parser.h"
 
-// Program → (Function)* EOF
+// Analisa o programa completo
 void Parser::parseProgram()
 {
     while (currentToken->name != END_OF_FILE)
@@ -11,11 +11,11 @@ void Parser::parseProgram()
     std::cout << "Compilation completed successfully.\n";
 }
 
-// Function → Type ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*}
+//  Type ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*}
 //         | void ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*}
-void Parser::parseFunction()
+void Parser::parseFunction() // Faz a análise da função completa
 {
-    if (currentToken->name == ID || currentToken->name == INT || currentToken->name == CHAR)
+    if (currentToken->name == ID || currentToken->name == INTEGER || currentToken->name == CHAR)
     {
         parseType(); // Analisa o tipo da função
         expect(ID);  // Espera o nome da função
@@ -35,7 +35,7 @@ void Parser::parseFunction()
     expect(PD);        // Espera o token ')'
 
     expect(BE); // Espera o token '{'
-    while (currentToken->name == CHAR || currentToken->name == INT)
+    while (currentToken->name == CHAR || currentToken->name == INTEGER)
     {
         parseType();
         parseVarDeclaration();
@@ -48,10 +48,10 @@ void Parser::parseFunction()
     expect(BD); // Fecha o bloco da função
 }
 
-// Type → char | int
+// Verifica se o token atual é um tipo válido
 void Parser::parseType()
 {
-    if (currentToken->name == CHAR || currentToken->name == INT)
+    if (currentToken->name == CHAR || currentToken->name == INTEGER)
     {
         nextToken();
     }
@@ -61,7 +61,7 @@ void Parser::parseType()
     }
 }
 
-// VarDeclaration → ID ([integerconstant])?
+// Valida a declaração de variáveis
 void Parser::parseVarDeclaration()
 {
     expect(ID);
@@ -73,7 +73,7 @@ void Parser::parseVarDeclaration()
     }
 }
 
-// ParamTypes → void | Type ID([])? (, Type ID([])?)*
+// Valida os tipos dos parâmetros (ParamTypes → void | Type ID ([])? (, Type ID ([])?)*)
 void Parser::parseParamTypes()
 {
     if (currentToken->name == ID)
@@ -83,13 +83,13 @@ void Parser::parseParamTypes()
     }
     else if (currentToken->name == CHAR)
     {
-        nextToken(); // void
+        nextToken(); //  Avança para o próximo token
     }
     else
     {
         error("Expected parameter type or 'void'");
     }
-    while (currentToken->name == VIRGULA)
+    while (currentToken->name == VIRGULA) // Verifica se há mais parâmetros
     {
         nextToken();
         parseType();
@@ -98,7 +98,7 @@ void Parser::parseParamTypes()
 }
 
 // Statement → if ( Expression ) Statement (else Statement)? | ...
-void Parser::parseStatement()
+void Parser::parseStatement() // Analisa as declarações de instruções (Statement)
 {
     if (currentToken->name == IF)
     {
@@ -116,7 +116,7 @@ void Parser::parseStatement()
 }
 
 // Assign → ID ([ Expression ])? = Expression
-void Parser::parseAssign()
+void Parser::parseAssign() // Analisa a atribuição de variáveis
 {
     expect(ID);
     if (currentToken->name == CE)
@@ -130,7 +130,7 @@ void Parser::parseAssign()
 }
 
 // Expression → - Expression | ! Expression | Expression BinOp Expression | ...
-void Parser::parseExpression()
+void Parser::parseExpression() // Analisa as expressões
 {
     if (currentToken->name == MINUS)
     {

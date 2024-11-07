@@ -40,14 +40,14 @@ public:
         nextToken(); // Inicializa o primeiro token
     }
 
-    void parseProgram();        // Program → (Function)* EOF
-    void parseFunction();       // Function → Type ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*}
-    void parseVarDeclaration(); // VarDeclaration → ID ([integerconstant])?
-    void parseType();           // Type → char | int
-    void parseParamTypes();     // ParamTypes → void | Type ID ([])? (, Type ID ([])?)*
-    void parseStatement();      // Statement → if ( Expression ) Statement (else Statement)?
-    void parseAssign();         // Assign → ID ([ Expression ])? = Expression
-    void parseExpression();     // Expression → - Expression | ! Expression | Expression BinOp Expression | ...
+    void parseProgram();        // Program → (Function)* EOF - Analisa o programa completo
+    void parseFunction();       // Function → Type ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*} - Analisa a função completa
+    void parseVarDeclaration(); // VarDeclaration → ID ([integerconstant])? - Valida a declaração de variáveis
+    void parseType();           // Type → char | int - Verifica se o token atual é um tipo válido
+    void parseParamTypes();     // ParamTypes → void | Type ID ([])? (, Type ID ([])?)* - Valida os tipos dos parâmetros
+    void parseStatement();      // Statement → if ( Expression ) Statement (else Statement)? | ... - Analisa as declarações de instruções (Statement)
+    void parseAssign();         // Assign → ID ([ Expression ])? = Expression - Valida a atribuição
+    void parseExpression();     // Expression → - Expression | ! Expression | Expression BinOp Expression | ... - Analisa as expressões
 };
 
 #endif // PARSER_H
