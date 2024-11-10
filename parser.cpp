@@ -1,4 +1,4 @@
-#include "parser1.h"
+#include "parser.h"
 
 Parser::Parser(string input)
 {
@@ -178,13 +178,15 @@ Parser::parseStatement()
 				expect(CD);
 				expect(EQUAL);
 				parseExpression();
+                expect(PONTO_VIGULA);
 			}
 		else if (currentToken->name == EQUAL)
 		{
 			nextToken();
 			parseExpression();
+            expect(PONTO_VIGULA);
 		}
-		else if (currentToken->name == PE);
+		else if (currentToken->name == PE)
 		{
 			nextToken();
 			if (currentToken->name != PD)
@@ -198,7 +200,7 @@ Parser::parseStatement()
 			}
 			else
 				expect(PD);
-			expect(PONTO_VIGULA);
+            expect(PONTO_VIGULA);
 		}
 	}
 	else if (currentToken->name == BE) // Statement → { (Statemente)* }
@@ -210,22 +212,6 @@ Parser::parseStatement()
 	}
 	else if (currentToken->name == PONTO_VIGULA) // Statement → ;
 		nextToken();
-}
-
-// Assign → ID ([ Expression ])? = Expression
-void
-Parser::parseAssign()
-{
-	expect(ID);
-	if (currentToken->name == CE) // Assign → ID [ Expression ] = Expression
-	{
-		nextToken();
-		parseExpression();
-		expect(CD);
-	}
-	expect(EQUAL);
-	parseExpression();
-	
 }
 
 // Expression → - Expression | ! Expression | Expression BinOp Expression | ...
