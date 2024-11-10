@@ -43,7 +43,11 @@ enum Names
     IF,           // 31 - if
     WHILE,        // 32 - while
     FOR,          // 33 - for
-    INT,          // 34 - int
+    CHAR_R,       // 34 - char
+    INT,          // 35 - int      
+    RETURN,       // 36 - return
+    VOID,         // 37 - void
+    LOGOP,        // 38 - operador lógico
     END_OF_FILE
 };
 

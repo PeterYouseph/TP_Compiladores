@@ -10,6 +10,8 @@ Scanner::Scanner(string input)
     pos = 0;
     line = 1;
 
+    //st = table;
+
     ifstream inputFile(input, ios::in);
     string line;
 
@@ -304,7 +306,7 @@ Token *Scanner::nextToken()
         case 9:
             if (pos + 1 < input.length() && input[pos + 1] == '&')
             {
-                tok = new Token(OP, AND, "&&");
+                tok = new Token(LOGOP, AND, "&&");
                 pos += 2; // Avança após '&&'
                 return tok;
             }
@@ -318,7 +320,7 @@ Token *Scanner::nextToken()
         case 10:
             if (pos + 1 < input.length() && input[pos + 1] == '|')
             {
-                tok = new Token(OP, OR, "||");
+                tok = new Token(LOGOP, OR, "||");
                 pos += 2; // Avança após '||'
                 return tok;
             }
