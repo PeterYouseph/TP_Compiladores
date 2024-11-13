@@ -1,50 +1,50 @@
 #include "parser.h"
 
-Parser::Parser(string input)
+// Construtor da classe Parser
+Parser::Parser(Scanner *input)
 {
-	scanner = new Scanner(input);
+	this->scanner = input; // Inicializa o scanner
 }
 
-void
-Parser::nextToken()
+// Obtém o próximo token da entrada
+void Parser::nextToken()
 {
 	currentToken = scanner->nextToken(); // Obtém o próximo token
 }
 
-void
-Parser::expect(int t)
+// Verifica se o token atual é igual ao token esperado
+void Parser::expect(int t)
 {
 	if (currentToken->name == t || currentToken->attribute == t)
 		nextToken();
 	else
 		error("Erro inesperado");
 }
-
-void
-Parser::parseRun()
+// void Parser::error(string str)
+void Parser::parseRun() // Inicía o programa
 {
-	nextToken();	
+	nextToken(); // Obtém o primeiro token
 
-	parseProgram();
-	
+	parseProgram(); // Inicia a análise sintática completa do programa
+
 	cout << "Compilação encerrada com sucesso!\n";
 }
 
-void
-Parser::parseProgram()
+// Program → (Function)* EOF
+void Parser::parseProgram()
 {
-    while (currentToken->name != END_OF_FILE)
-        parseFunction();
+	while (currentToken->name != END_OF_FILE)
+		parseFunction();
 
-    expect(END_OF_FILE);
+	expect(END_OF_FILE);
 }
 
-void
-Parser::parseFunction()
+// Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗} | Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
+void Parser::parseFunction()
 {
 	if (currentToken->name == VOID) // Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
 		nextToken();
-	else                            // Function → Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
+	else // Function → Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
 		parseType();
 	expect(ID);
 	expect(PE);
@@ -62,14 +62,12 @@ Parser::parseFunction()
 			expect(PONTO_VIGULA);
 		}
 		parseStatement();
-
 	}
 	expect(BD);
 }
 
-//VarDeclaration → ID ([integerconstant] )?
-void
-Parser::parseVarDeclaration()
+// VarDeclaration → ID ([integerconstant] )?
+void Parser::parseVarDeclaration()
 {
 	expect(ID);
 	if (currentToken->name == CE)
@@ -81,24 +79,21 @@ Parser::parseVarDeclaration()
 }
 
 // Type → char | int
-void
-Parser::parseType()
+// Função para reconhecer tipos de função e declaração de variáveis
+void Parser::parseType()
 {
-	if (currentToken->name == CHAR_R)   // Type → char
-		nextToken();
-	else if (currentToken->name == INT) // Type → int
+	if (currentToken->name == CHAR_R || currentToken->name == INT)
 		nextToken();
 	else
-		error("Expected int or char.");
+		error("Syntax Error - Expected int or char.");
 }
 
 // ParamTypes → void | Type ID([])?(,Type ID([])?)∗
-void
-Parser::parseParamTypes()
+void Parser::parseParamTypes()
 {
 	if (currentToken->name == VOID) // ParamTypes → void
 		nextToken();
-	else                            // ParamTypes → Type ID([])?(,Type ID([])?)∗
+	else // ParamTypes → Type ID([])?(,Type ID([])?)∗
 	{
 		parseType();
 		expect(ID);
@@ -123,9 +118,8 @@ Parser::parseParamTypes()
 	}
 }
 
-// Statement → if ( Expression ) Statement (else Statement)? | ...
-void
-Parser::parseStatement()
+// Statement → if ( Expression ) Statement (else Statement)? | while ( Expression ) Statement | for ( (Assign)?;(Expression)?;(Assign)? ) Statement | return (Expression)? | Assign ;
+void Parser::parseStatement()
 {
 	if (currentToken->name == IF) // Statement → if ( Expression ) Statement (else Statement)?
 	{
@@ -135,10 +129,10 @@ Parser::parseStatement()
 		expect(PD);
 		parseStatement();
 		if (currentToken->name == ELSE)
-        {
-            nextToken();
-            parseStatement();
-        }
+		{
+			nextToken();
+			parseStatement();
+		}
 	}
 	else if (currentToken->name == WHILE) // Statement → while ( Expression ) Statement
 	{
@@ -152,7 +146,7 @@ Parser::parseStatement()
 	{
 		nextToken();
 		expect(PE);
-		//TODO
+		// TODO
 		expect(PD);
 		parseStatement();
 	}
@@ -172,19 +166,19 @@ Parser::parseStatement()
 	{
 		nextToken();
 		if (currentToken->name == CE) // Assign → ID [ Expression ] = Expression
-			{
-				nextToken();
-				parseExpression();
-				expect(CD);
-				expect(EQUAL);
-				parseExpression();
-                expect(PONTO_VIGULA);
-			}
+		{
+			nextToken();
+			parseExpression();
+			expect(CD);
+			expect(EQUAL);
+			parseExpression();
+			expect(PONTO_VIGULA);
+		}
 		else if (currentToken->name == EQUAL)
 		{
 			nextToken();
 			parseExpression();
-            expect(PONTO_VIGULA);
+			expect(PONTO_VIGULA);
 		}
 		else if (currentToken->name == PE)
 		{
@@ -200,7 +194,7 @@ Parser::parseStatement()
 			}
 			else
 				expect(PD);
-            expect(PONTO_VIGULA);
+			expect(PONTO_VIGULA);
 		}
 	}
 	else if (currentToken->name == BE) // Statement → { (Statemente)* }
@@ -215,21 +209,20 @@ Parser::parseStatement()
 }
 
 // Expression → - Expression | ! Expression | Expression BinOp Expression | ...
-void
-Parser::parseExpression() // Analisa as expressões
+void Parser::parseExpression() // Analisa as expressões
 {
-    if (currentToken->name == MINUS) // Expression → - Expression
-    {
-        nextToken();
-        parseExpression();
+	if (currentToken->name == MINUS) // Expression → - Expression
+	{
+		nextToken();
+		parseExpression();
 		parseExprLinha();
-    }
-    else if (currentToken->name == NOT) // Expression → ! Expression
-    {
-        nextToken();
-        parseExpression();
+	}
+	else if (currentToken->name == NOT) // Expression → ! Expression
+	{
+		nextToken();
+		parseExpression();
 		parseExprLinha();
-    }
+	}
 	// TODO E BinOp E | E RelOp E | E LogOp E
 	else if (currentToken->name == ID) // Expression → ID(((Expression ( , Expression)∗)?)|[ Expression ])?
 	{
@@ -237,7 +230,7 @@ Parser::parseExpression() // Analisa as expressões
 		if (currentToken->name == PE) // Expression → ID ()
 		{
 			nextToken();
-			if (currentToken->name != PD)  // Expression → ID ( Expression )
+			if (currentToken->name != PD) // Expression → ID ( Expression )
 			{
 				parseExpression();
 				if (currentToken->name == VIRGULA) // Expression → ID ( Expression, Expression )
@@ -253,7 +246,7 @@ Parser::parseExpression() // Analisa as expressões
 		}
 		parseExprLinha();
 	}
-	else if (currentToken->name == PE)     // Expression →  (Expression)
+	else if (currentToken->name == PE) // Expression →  (Expression)
 	{
 		nextToken();
 		parseExpression();
@@ -265,20 +258,19 @@ Parser::parseExpression() // Analisa as expressões
 		nextToken();
 		parseExprLinha();
 	}
-	else if (currentToken->name == CHAR)    // Expression → charconstant
+	else if (currentToken->name == CHAR) // Expression → charconstant
 	{
 		nextToken();
 		parseExprLinha();
 	}
-	else if (currentToken->name == STRING)  // Expression → stringconstant
+	else if (currentToken->name == STRING) // Expression → stringconstant
 	{
 		nextToken();
 		parseExprLinha();
 	}
 }
 
-void
-Parser::parseExprLinha()
+void Parser::parseExprLinha() // ExpreLinha → BinOp Expression ExpreLinha | Relop Expression ExpreLinha | LogOp Expression ExpreLinha | ε
 {
 	if (currentToken->name == OP)
 	{
@@ -301,46 +293,43 @@ Parser::parseExprLinha()
 }
 
 // BinOp → + | - | * | /
-void
-Parser::parseBinOp()
+void Parser::parseBinOp()
 {
-	if (currentToken->name == PLUS)       // BinOp → +
+	if (currentToken->name == PLUS) // BinOp → +
 		nextToken();
 	else if (currentToken->name == MINUS) // BinOp → -
 		nextToken();
-	else if (currentToken->name == MULT)  // BinOp → *
+	else if (currentToken->name == MULT) // BinOp → *
 		nextToken();
-	else if (currentToken->name == DIV)   // BinOp → /
+	else if (currentToken->name == DIV) // BinOp → /
 		nextToken();
 	else
 		error("Expected +, -, * or /");
 }
 
 // RelOp → == | != | <= | < | >= | >
-void
-Parser::parseRelOp()
+void Parser::parseRelOp()
 {
-	if (currentToken->name == EQ_COM)   // RelOp → ==
+	if (currentToken->name == EQ_COM) // RelOp → ==
 		nextToken();
 	else if (currentToken->name == DIF) // RelOp → !=
 		nextToken();
-	else if (currentToken->name == LE)  // RelOp → <=
+	else if (currentToken->name == LE) // RelOp → <=
 		nextToken();
-	else if (currentToken->name == LT)  // RelOp → <
+	else if (currentToken->name == LT) // RelOp → <
 		nextToken();
-	else if (currentToken->name == GE)  // RelOp → >=
+	else if (currentToken->name == GE) // RelOp → >=
 		nextToken();
-	else if (currentToken->name == GT)  // RelOp → >
+	else if (currentToken->name == GT) // RelOp → >
 		nextToken();
 	else
 		error("Expected ==, !=, <=, <, >= or >");
 }
 
 // LopOp → && | ||
-void
-Parser::parseLogOp()
+void Parser::parseLogOp()
 {
-	if (currentToken->name == AND)     // LopOp → &&
+	if (currentToken->name == AND) // LopOp → &&
 		nextToken();
 	else if (currentToken->name == OR) // LopOp → ||
 		nextToken();
@@ -348,7 +337,7 @@ Parser::parseLogOp()
 		error("Expected && or ||.");
 }
 
-//TODO
+// TODO
 
 // void
 // Parser::error(string str)

@@ -8,33 +8,32 @@ void print(Token *);
 void allocVetor();
 void freeVetor();
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[]) // Função principal do compilador
 {
     if (argc != 2)
     {
-        cout << "Uso: ./compiler nome_arquivo.mj\n";
+        cerr << "Uso: " << argv[0] << " <arquivo>" << endl; // Exibe a mensagem de uso correto
         return 1;
     }
 
-    Scanner *scanner = new Scanner(argv[1]);
-    allocVetor();
+    allocVetor(); // Aloca o vetor de tokens
 
     try
     {
-        // Cria uma instância do Parser e inicia a análise
-        Parser parser(scanner);
-        parser.parseProgram(); // Inicia a análise sintática completa do programa
+        Scanner scanner(argv[1]); // Cria uma instância do scanner
+        Parser parser(&scanner);  // Cria uma instância do parser com o scanner
+
+        parser.parseRun(); // Inicia a análise sintática completa do programa
         cout << "Análise sintática completa sem erros.\n";
     }
     catch (const runtime_error &e) // Captura exceções de erro de sintaxe e exibe a mensagem
     {
-        cerr << e.what() << endl;
+        cerr << "Error: " << e.what() << endl; // Exibe a mensagem de erro com a linha onde ocorreu o erro
     }
 
-    delete scanner; // Libera a memória alocada para o scanner
-    freeVetor();    // Libera a memória alocada para o vetor de tokens
+    freeVetor(); // Libera a memória alocada para o vetor de tokens
 
-    return 0;
+    return 0; // Retorna 0 para indicar que o programa foi executado com sucesso
 }
 
 // Acrescentar os vetores dos demais token
