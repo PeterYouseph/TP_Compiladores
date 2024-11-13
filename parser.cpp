@@ -121,7 +121,7 @@ void Parser::parseParamTypes()
 // Statement → if ( Expression ) Statement (else Statement)? | while ( Expression ) Statement | for ( (Assign)?;(Expression)?;(Assign)? ) Statement | return (Expression)? | Assign ;
 void Parser::parseStatement()
 {
-	if (currentToken->name == IF) // Statement → if ( Expression ) Statement (else Statement)?
+	if (currentToken->name == IF) // if ( Expression ) Statement (else Statement)?
 	{
 		nextToken();
 		expect(PE);
@@ -134,7 +134,7 @@ void Parser::parseStatement()
 			parseStatement();
 		}
 	}
-	else if (currentToken->name == WHILE) // Statement → while ( Expression ) Statement
+	else if (currentToken->name == WHILE) // while ( Expression ) Statement
 	{
 		nextToken();
 		expect(PE);
@@ -142,45 +142,48 @@ void Parser::parseStatement()
 		expect(PD);
 		parseStatement();
 	}
-	else if (currentToken->name == FOR) // Statement → for ( (Assign)?;(Expression)?;(Assign)? ) Statement
+	else if (currentToken->name == FOR) // for ( (Assign)?; (Expression)?; (Assign)? ) Statement
 	{
 		nextToken();
 		expect(PE);
-		// TODO
+		if (currentToken->name == ID)
+			parseAssign();
+		expect(PONTO_VIGULA);
+
+		if (currentToken->name != PONTO_VIGULA) // Pode ter ou não uma expressão
+			parseExpression();
+		expect(PONTO_VIGULA);
+
+		if (currentToken->name == ID) // Segunda atribuição opcional
+			parseAssign();
 		expect(PD);
+
 		parseStatement();
 	}
-	else if (currentToken->name == RETURN) // Statement → return (Expression)?;
+	else if (currentToken->name == RETURN) // return (Expression)?;
 	{
 		nextToken();
 		if (currentToken->name != PONTO_VIGULA)
-		{
 			parseExpression();
-			expect(PONTO_VIGULA);
-		}
-		else
-			expect(PONTO_VIGULA);
+		expect(PONTO_VIGULA);
 	}
-	// TODO Statement → Assign ;
-	else if (currentToken->name == ID) // Statement → ID ([ Expression ])? = Expression | ID( (Expression( , Expression)∗)? );
+	else if (currentToken->name == ID) // Pode ser um Assign ou um ID()
 	{
 		nextToken();
-		if (currentToken->name == CE) // Assign → ID [ Expression ] = Expression
+		if (currentToken->name == CE) // ID[ Expression ] = Expression;
 		{
 			nextToken();
 			parseExpression();
 			expect(CD);
 			expect(EQUAL);
 			parseExpression();
-			expect(PONTO_VIGULA);
 		}
-		else if (currentToken->name == EQUAL)
+		else if (currentToken->name == EQUAL) // ID = Expression;
 		{
 			nextToken();
 			parseExpression();
-			expect(PONTO_VIGULA);
 		}
-		else if (currentToken->name == PE)
+		else if (currentToken->name == PE) // ID( (Expression (, Expression)*)? );
 		{
 			nextToken();
 			if (currentToken->name != PD)
@@ -192,20 +195,39 @@ void Parser::parseStatement()
 					parseExpression();
 				}
 			}
-			else
-				expect(PD);
-			expect(PONTO_VIGULA);
+			expect(PD);
 		}
+		expect(PONTO_VIGULA);
 	}
-	else if (currentToken->name == BE) // Statement → { (Statemente)* }
+	else if (currentToken->name == BE) // { (Statement)* }
 	{
 		nextToken();
 		while (currentToken->name != BD)
 			parseStatement();
-		expect(PONTO_VIGULA);
+		expect(BD); // Sem necessidade de PONTO_VIGULA
 	}
-	else if (currentToken->name == PONTO_VIGULA) // Statement → ;
+	else if (currentToken->name == PONTO_VIGULA) // ;
+	{
 		nextToken();
+	}
+	else
+	{
+		error("Expected statement");
+	}
+}
+
+// Assign → ID([Expression])? = Expression
+void Parser::parseAssign()
+{
+	expect(ID);
+	if (currentToken->name == CE) // ID[ Expression ] = Expression
+	{
+		nextToken();
+		parseExpression();
+		expect(CD);
+	}
+	expect(EQUAL);
+	parseExpression();
 }
 
 // Expression → - Expression | ! Expression | Expression BinOp Expression | ...
