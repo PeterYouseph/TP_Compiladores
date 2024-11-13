@@ -1,5 +1,18 @@
 #include "scanner.h"
 
+// Tabela de palavras reservadas - [NOT WORKING]
+void Scanner::initializeReservedWords()
+{
+    reservedWords["int"] = INT;
+    reservedWords["char"] = CHAR_R;
+    reservedWords["void"] = VOID;
+    reservedWords["if"] = IF;
+    reservedWords["else"] = ELSE;
+    reservedWords["while"] = WHILE;
+    reservedWords["for"] = FOR;
+    reservedWords["return"] = RETURN;
+}
+
 // Construtor
 Scanner::Scanner(string input)
 {
@@ -10,7 +23,9 @@ Scanner::Scanner(string input)
     pos = 0;
     line = 1;
 
-    //st = table;
+    initializeReservedWords(); // Adiciona esta linha para inicializar palavras reservadas
+
+    // st = table;
 
     ifstream inputFile(input, ios::in);
     string line;
@@ -188,7 +203,19 @@ Token *Scanner::nextToken()
                 lexeme += input[pos];
                 pos++;
             }
-            tok = new Token(ID, UNDEF, lexeme); // Cria um novo token com o lexema
+
+            // Verificar se o lexema é uma palavra reservada
+            if (reservedWords.find(lexeme) != reservedWords.end())
+            {
+                // Se o lexema é uma palavra reservada, retorna o token correspondente
+                tok = new Token(reservedWords[lexeme], UNDEF, lexeme);
+                // Pega o tipo de token da tabela
+            }
+            else
+            {
+                // Caso contrário, trata como um identificador (ID)
+                tok = new Token(ID, UNDEF, lexeme); // Cria o token como identificador
+            }
             return tok;
 
         case 2: // Inteiro (INTEGER)

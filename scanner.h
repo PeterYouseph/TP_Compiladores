@@ -2,14 +2,19 @@
 #define SCANNER_H
 
 #include <fstream>
+#include <unordered_map>
+#include <string>
 #include "token.h"
 
 class Scanner
 {
 private:
     std::string input; // Armazena o texto de entrada
-    int pos;           // Posição atual
-    int line;          // Linha atual
+    std::unordered_map<std::string, int> reservedWords;
+    int pos;  // Posição atual
+    int line; // Linha atual
+
+    void initializeReservedWords();
 
 public:
     // Construtor
