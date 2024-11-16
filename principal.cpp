@@ -20,10 +20,9 @@ int main(int argc, char *argv[]) // Função principal do compilador
 
     try
     {
-        Scanner scanner(argv[1]); // Cria uma instância do scanner
-        Parser parser(&scanner);  // Cria uma instância do parser com o scanner
+        Parser* parser = new Parser(argv[1]);  // Cria uma instância do parser com o scanner
 
-        parser.parseRun(); // Inicia a análise sintática completa do programa
+        parser->parseRun(); // Inicia a análise sintática completa do programa
         cout << "Análise sintática completa sem erros.\n";
     }
     catch (const runtime_error &e) // Captura exceções de erro de sintaxe e exibe a mensagem

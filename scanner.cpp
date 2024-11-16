@@ -1,20 +1,7 @@
 #include "scanner.h"
 
-// Tabela de palavras reservadas - [NOT WORKING]
-void Scanner::initializeReservedWords()
-{
-    reservedWords["int"] = INT;
-    reservedWords["char"] = CHAR_R;
-    reservedWords["void"] = VOID;
-    reservedWords["if"] = IF;
-    reservedWords["else"] = ELSE;
-    reservedWords["while"] = WHILE;
-    reservedWords["for"] = FOR;
-    reservedWords["return"] = RETURN;
-}
-
 // Construtor
-Scanner::Scanner(string input)
+Scanner::Scanner(string input, SymbolTable *symbolTable)
 {
     /*this->input = input;
     cout << "Entrada: " << input << endl
@@ -22,8 +9,7 @@ Scanner::Scanner(string input)
          << input.length() << endl;*/
     pos = 0;
     line = 1;
-
-    initializeReservedWords(); // Adiciona esta linha para inicializar palavras reservadas
+    st = symbolTable;
 
     // st = table;
 
@@ -65,14 +51,14 @@ Token *Scanner::nextToken()
     {
         switch (state)
         {
-        case 0:
+        case 0: {
             lexeme = "";            // Inicializa o lexema como uma string vazia
             if (input[pos] == '\0') // Verifica se chegou ao final do arquivo, retornando o token de END_OF_FILE
             {
                 tok = new Token(END_OF_FILE, UNDEF);
                 return tok;
             }
-            else if (isalpha(input[pos]) || input[pos] == '_') // Verifica se o caractere é uma letra ou um underline
+            else if (isalpha(input[pos])) // Verifica se o caractere é uma letra ou um underline
                 state = 1;
             else if (isdigit(input[pos])) // Verifica se o caractere é um dígito
                 state = 2;
@@ -194,8 +180,10 @@ Token *Scanner::nextToken()
                 pos++; // Avança para o próximo caractere se for inválido no estado atual
             }
             break;
+        }
 
         case 1: // Identificador (ID)
+        {
             lexeme += input[pos];
             pos++;
             while (isalnum(input[pos]) || input[pos] == '_')
@@ -203,12 +191,12 @@ Token *Scanner::nextToken()
                 lexeme += input[pos];
                 pos++;
             }
-
+            STEntry* reserved = st->get(lexeme);
             // Verificar se o lexema é uma palavra reservada
-            if (reservedWords.find(lexeme) != reservedWords.end())
+            if (reserved)
             {
                 // Se o lexema é uma palavra reservada, retorna o token correspondente
-                tok = new Token(reservedWords[lexeme], UNDEF, lexeme);
+                tok = new Token(reserved->token->name);
                 // Pega o tipo de token da tabela
             }
             else
@@ -217,8 +205,10 @@ Token *Scanner::nextToken()
                 tok = new Token(ID, UNDEF, lexeme); // Cria o token como identificador
             }
             return tok;
+        }
 
         case 2: // Inteiro (INTEGER)
+        {
             lexeme += input[pos];
             pos++;
             while (isdigit(input[pos]))
@@ -228,6 +218,7 @@ Token *Scanner::nextToken()
             }
             tok = new Token(INTEGER, stoi(lexeme)); // Aqui converte o lexeme para um inteiro
             return tok;
+        }
 
         case 3:
             pos++;       // Avança para o próximo caractere após a aspas simples
@@ -364,6 +355,7 @@ Token *Scanner::nextToken()
             pos++;
             state = 0; // Volta para o estado inicial
             break;
+        default: lexicalError("unexpected case");
         }
     }
 } // Fim nextToken

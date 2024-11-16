@@ -1,18 +1,24 @@
 #include "scanner.h"
 
+
 class Parser
 {
 private:
 	Scanner *scanner;	 // A instância do scanner
 	Token *currentToken; // O token atua
 
+	SymbolTable *globalST;
+	SymbolTable *currentST;
+
 	void nextToken();
 	void expect(int tokenType);
+	void expectId();
 
 	void error(const std::string &message)
 	{
 		throw std::runtime_error(message + " at line " + std::to_string(scanner->getLine()));
 	}
+	void initSymbolTable();		//  Adds reserved IDs to global ST
 
 	void parseProgram();		// Program → (Function)* EOF - Analisa o programa completo
 	void parseFunction();		// Function → Type ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*} - Analisa a função completa
@@ -28,7 +34,6 @@ private:
 	void parseLogOp();			// LogOp → && | ||
 
 public:
-	Parser(Scanner *scanner); // Construtor
-
 	void parseRun(); // Inicía o programa
+	Parser(std::string); // Construtor
 };

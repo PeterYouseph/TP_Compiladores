@@ -1,10 +1,24 @@
 #include "parser.h"
 
 // Construtor da classe Parser
-Parser::Parser(Scanner *input)
+Parser::Parser(std::string input)
 {
-	this->scanner = input; // Inicializa o scanner
+	currentST = globalST = new SymbolTable();
+	this->scanner = new Scanner(input, globalST); // Inicializa o scanner
+	initSymbolTable();
 }
+
+void Parser::initSymbolTable() {
+	globalST->add(new STEntry(new Token(INT), true));
+	globalST->add(new STEntry(new Token(CHAR_R), true));
+	globalST->add(new STEntry(new Token(VOID), true));
+	globalST->add(new STEntry(new Token(IF), true));
+	globalST->add(new STEntry(new Token(ELSE), true));
+	globalST->add(new STEntry(new Token(WHILE), true));
+	globalST->add(new STEntry(new Token(FOR), true));
+	globalST->add(new STEntry(new Token(RETURN), true));
+}
+
 
 // Obtém o próximo token da entrada
 void Parser::nextToken()
@@ -12,6 +26,15 @@ void Parser::nextToken()
 	currentToken = scanner->nextToken(); // Obtém o próximo token
 }
 
+
+// Verifica se o token atual é igual ao token esperado
+void Parser::expectId()
+{
+	if (currentToken->name == ID) {
+		currentST->add(new STEntry(currentToken, true));
+		nextToken();
+	} else error("Erro inesperado");
+}
 // Verifica se o token atual é igual ao token esperado
 void Parser::expect(int t)
 {
@@ -42,6 +65,7 @@ void Parser::parseProgram()
 // Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗} | Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
 void Parser::parseFunction()
 {
+	currentST = new SymbolTable(globalST);
 	if (currentToken->name == VOID) // Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
 		nextToken();
 	else // Function → Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
@@ -57,8 +81,10 @@ void Parser::parseFunction()
 		{
 			parseType();
 			parseVarDeclaration();
-			while (currentToken->name == VIRGULA)
+			while (currentToken->name == VIRGULA) {
+				nextToken();
 				parseVarDeclaration();
+			}
 			expect(PONTO_VIGULA);
 		}
 		parseStatement();
@@ -66,7 +92,8 @@ void Parser::parseFunction()
 	expect(BD);
 }
 
-// VarDeclaration → ID ([integerconstant] )?
+// VarDeclaration → ID[integerconstant]
+// VarDeclaration → ID
 void Parser::parseVarDeclaration()
 {
 	expect(ID);

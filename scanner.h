@@ -4,21 +4,21 @@
 #include <fstream>
 #include <unordered_map>
 #include <string>
+
+#include "symboltable.h"
 #include "token.h"
 
 class Scanner
 {
 private:
     std::string input; // Armazena o texto de entrada
-    std::unordered_map<std::string, int> reservedWords;
     int pos;  // Posição atual
     int line; // Linha atual
-
-    void initializeReservedWords();
+    SymbolTable* st;
 
 public:
     // Construtor
-    Scanner(std::string);
+    Scanner(std::string, SymbolTable*);
 
     int getLine();
 
