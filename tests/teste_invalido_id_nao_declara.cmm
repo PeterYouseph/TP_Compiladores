@@ -1,0 +1,3 @@
+void main() {
+    x = 10; // Erro: 'x' não foi declarado
+}
