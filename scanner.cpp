@@ -41,6 +41,8 @@ int Scanner::getLine()
 // Método que retorna o próximo token da entrada
 Token *Scanner::nextToken()
 {
+    std::cout << "[DEBUG SCANNER] Current Char: '" << input[pos] << "' at pos: " << pos 
+              << ", line: " << line << std::endl;
     Token *tok;
     string lexeme;
     string l;

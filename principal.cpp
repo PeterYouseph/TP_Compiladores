@@ -1,6 +1,6 @@
 #include "scanner.h"
 #include "token.h"
-#include "parser.h"
+#include "parser.h"  // Inclua o header do parser
 
 string *vet;
 
@@ -8,15 +8,16 @@ void print(Token *);
 void allocVetor();
 void freeVetor();
 
-int main(int argc, char *argv[]) // Função principal do compilador
+int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        cerr << "Uso: " << argv[0] << " <arquivo>" << endl; // Exibe a mensagem de uso correto
+        cout << "Uso: ./compiler nome_arquivo.mj\n";
         return 1;
     }
 
-    allocVetor(); // Aloca o vetor de tokens
+    // Cria o Scanner que irá ler o arquivo
+    Scanner *scanner = new Scanner(argv[1]);
 
     try
     {
@@ -25,14 +26,15 @@ int main(int argc, char *argv[]) // Função principal do compilador
         parser->parseRun(); // Inicia a análise sintática completa do programa
         cout << "Análise sintática completa sem erros.\n";
     }
-    catch (const runtime_error &e) // Captura exceções de erro de sintaxe e exibe a mensagem
-    {
-        cerr << "Error: " << e.what() << endl; // Exibe a mensagem de erro com a linha onde ocorreu o erro
-    }
 
-    freeVetor(); // Libera a memória alocada para o vetor de tokens
+    // Deleta o scanner e o parser após o uso
+    delete parser;
+    delete scanner;
 
-    return 0; // Retorna 0 para indicar que o programa foi executado com sucesso
+    // Libera o vetor alocado
+    freeVetor();
+
+    return 0;
 }
 
 // Acrescentar os vetores dos demais token

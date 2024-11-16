@@ -1,9 +1,10 @@
 #include "scanner.h"
-
+#include <map>
 
 class Parser
 {
 private:
+	std::map<std::string, Symbol> symbolTable; // Tabela de símbolos 
 	Scanner *scanner;	 // A instância do scanner
 	Token *currentToken; // O token atua
 
@@ -13,13 +14,7 @@ private:
 	void nextToken();
 	void expect(int tokenType);
 	void expectId();
-
-	void error(const std::string &message)
-	{
-		throw std::runtime_error(message + " at line " + std::to_string(scanner->getLine()));
-	}
 	void initSymbolTable();		//  Adds reserved IDs to global ST
-
 	void parseProgram();		// Program → (Function)* EOF - Analisa o programa completo
 	void parseFunction();		// Function → Type ID(ParamTypes){(Type VarDeclaration(...)* ;)(Statement)*} - Analisa a função completa
 	void parseVarDeclaration(); // VarDeclaration → ID ([integerconstant])? - Valida a declaração de variáveis
@@ -32,6 +27,9 @@ private:
 	void parseBinOp();			// BinOp → + | - | * | /
 	void parseRelOp();			// RelOp → == | != | <= | < | >= | >
 	void parseLogOp();			// LogOp → && | ||
+	void checkSymbol(const std::string &name, int line);
+	void addSymbol(const std::string &name, const std::string &type, const std::string &scope, int line); // Adiciona um símbolo à tabela de símbolos
+	void error(const std::string &msg); // Exibe uma mensagem de erro e lança uma exceção
 
 public:
 	void parseRun(); // Inicía o programa
