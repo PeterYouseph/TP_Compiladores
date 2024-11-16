@@ -1,0 +1,8 @@
+int valor() {
+    return 42;
+}
+
+void main() {
+    int resultado;
+    resultado = valor();
+}

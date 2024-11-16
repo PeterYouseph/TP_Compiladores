@@ -1,0 +1,4 @@
+void main() {
+    int x;
+    x = 10 +; // Erro: operador '+' sem operando direito
+}
