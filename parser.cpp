@@ -4,95 +4,214 @@
 Parser::Parser(Scanner *input)
 {
 	this->scanner = input; // Inicializa o scanner
+	this->currentToken = nullptr; // Inicializa o token atual
 }
 
 // Obtém o próximo token da entrada
 void Parser::nextToken()
 {
 	currentToken = scanner->nextToken(); // Obtém o próximo token
+	if (currentToken) {
+        std::cout << "[DEBUG] Next Token: " << currentToken->name 
+                  << " Lexeme: '" << currentToken->lexeme 
+                  << "' Line: " << scanner->getLine() << std::endl;
+		cout << "Token: " << currentToken->name << " Lexeme: " << currentToken->lexeme << " Line: " << scanner->getLine() << endl;
+    } else {
+        std::cout << "[DEBUG] End of file reached." << std::endl;
+		cout << "Token: " << END_OF_FILE << " Lexeme: " << "EOF" << " Line: " << scanner->getLine() << endl;
+    }
+}
+
+// Verificação para Tabela de Símbolos // 
+void Parser::addSymbol(const std::string &name, const std::string &type, const std::string &scope, int line) { // Adiciona um símbolo à tabela de símbolos 
+    if (symbolTable.find(name) == symbolTable.end()) { // Verifica se o símbolo já foi declarado
+        symbolTable[name] = {type, scope, line};
+    } else { // Se o símbolo já foi declarado, exibe um erro
+        error("Symbol '" + name + "' already declared at line " + std::to_string(symbolTable[name].line));
+    }
+}
+
+void Parser::checkSymbol(const std::string &name, int line) { // Verifica se o identificador foi declarado
+    if (symbolTable.find(name) == symbolTable.end()) { // Se o identificador não foi declarado, exibe um erro
+        error("Undeclared identifier '" + name + "' used at line " + std::to_string(line));
+    }
 }
 
 // Verifica se o token atual é igual ao token esperado
 void Parser::expect(int t)
 {
-	if (currentToken->name == t || currentToken->attribute == t)
+	if (currentToken->name == t || currentToken->attribute == t){
 		nextToken();
-	else
-		error("Erro inesperado");
+	}
+	else{
+		// error("Erro inesperado"); 
+		nextToken();
+	}
 }
 // void Parser::error(string str)
 void Parser::parseRun() // Inicía o programa
 {
+	std::cout << "[DEBUG] Starting parseRun." << std::endl;
+
 	nextToken(); // Obtém o primeiro token
 
 	parseProgram(); // Inicia a análise sintática completa do programa
+	    std::cout << "[DEBUG] Parsing completed successfully!" << std::endl;
 
-	cout << "Compilação encerrada com sucesso!\n";
+	if (currentToken->name != END_OF_FILE) { // Verifica se o token atual é o final do arquivo
+		error("Syntax Error - Expected end of file.");
+	} else {
+		// Final de arquivo compilado com sucesso estilizado com cor verde (para sucesso)
+		const std::string GREEN = "\033[1;32m";
+		const std::string RESET = "\033[0m"; // Reseta a cor para o padrão
+		std::cout << GREEN << "[SUCCESS] Compilation successful!" << RESET << std::endl;
+	}
 }
 
 // Program → (Function)* EOF
 void Parser::parseProgram()
 {
-	while (currentToken->name != END_OF_FILE)
+	while (currentToken->name != END_OF_FILE){
+		std::cout << "[DEBUG] Parsing function at line: " << scanner->getLine() << std::endl;
 		parseFunction();
-
+	}
 	expect(END_OF_FILE);
+	std::cout << "[DEBUG] Program parsed successfully!" << std::endl;
+
 }
 
-// Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗} | Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
+// // Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗} | Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
 void Parser::parseFunction()
 {
-	if (currentToken->name == VOID) // Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
-		nextToken();
-	else // Function → Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
-		parseType();
-	expect(ID);
-	expect(PE);
-	parseParamTypes();
-	expect(PD);
-	expect(BE);
-	while (currentToken->name != BD)
-	{
-		while (currentToken->name == CHAR_R || currentToken->name == INT)
-		{
-			parseType();
-			parseVarDeclaration();
-			while (currentToken->name == VIRGULA)
-				parseVarDeclaration();
-			expect(PONTO_VIGULA);
+    std::cout << "[DEBUG] Parsing function at line: " << scanner->getLine() << std::endl;
+
+    // Função de retorno VOID ou tipo específico
+    if (currentToken->name == VOID) {
+        std::cout << "[DEBUG] Function return type: void" << std::endl;
+        nextToken();
+    } else if (currentToken->name == CHAR_R || currentToken->name == INT) {
+        std::cout << "[DEBUG] Parsing function return type..." << std::endl;
+        parseType();
+    } else {
+        error("Syntax Error - Expected return type.");
+    }
+
+    // Nome da função
+    if (currentToken->name == ID) {
+        std::cout << "[DEBUG] Function name: " << currentToken->lexeme << std::endl;
+        addSymbol(currentToken->lexeme, "function", "global", scanner->getLine());
+        nextToken();
+    } else {
+        error("Syntax Error - Expected function name.");
+    }
+
+    expect(PE); // Espera o '(' de parâmetros
+    parseParamTypes(); // Processa os parâmetros
+    expect(PD); // Espera o ')' de fechamento
+    expect(BE); // Espera '{' do corpo da função
+
+    // Aqui deve haver uma verificação mais detalhada para declaração de variáveis e instruções
+    while (currentToken->name != BD) {  // Enquanto não encontrar o fechamento da função
+        if (currentToken->name == CHAR_R || currentToken->name == INT) {
+            parseType();  // Lida com o tipo da variável
+            parseVarDeclaration();  // Declara a variável
+            while (currentToken->name == VIRGULA) { // Caso haja mais variáveis
+                nextToken();
+                parseVarDeclaration();
+            }
+            expect(PONTO_VIGULA);  // Espera o ponto e vírgula após a declaração
+        } else if (currentToken->name == ID) {
+			parseStatement();  // Lida com as instruções
+		} else {
+			error("Syntax Error - Expected variable declaration or statement.");
 		}
-		parseStatement();
-	}
-	expect(BD);
+    }
+    expect(BD);  // Espera o fechamento da função
+    std::cout << "[DEBUG] Function parsed successfully!" << std::endl;
 }
+
 
 // VarDeclaration → ID ([integerconstant] )?
 void Parser::parseVarDeclaration()
 {
-	expect(ID);
-	if (currentToken->name == CE)
-	{
-		nextToken();
-		expect(INTEGER);
-		expect(CD);
+    std::string name = currentToken->lexeme;
+    std::cout << "[DEBUG] Declaring variable: " << name 
+              << " at line: " << scanner->getLine() << std::endl;
+    expect(ID);  // Espera pelo identificador da variável
+    addSymbol(name, currentToken->lexeme, "global", scanner->getLine());
+    
+    // Se for um array, lida com a declaração do tamanho do array
+    if (currentToken->name == CE) {
+        std::cout << "[DEBUG] Declaring array size..." << std::endl;
+        nextToken();
+        expect(INTEGER);  // Espera um valor inteiro para o tamanho do array
+        expect(CD);  // Fecha o colchete
+    }
+
+    if (currentToken->name == VIRGULA) {
+		while (currentToken->name != PONTO_VIGULA) {
+			nextToken();
+			std::string name = currentToken->lexeme;
+			std::cout << "[DEBUG] Declaring variable: " << name 
+					  << " at line: " << scanner->getLine() << std::endl;
+			expect(ID);
+			addSymbol(name, currentToken->lexeme, "global", scanner->getLine());
+			if (currentToken->name == CE) {
+				std::cout << "[DEBUG] Declaring array size..." << std::endl;
+				nextToken();
+				expect(INTEGER);
+				expect(CD); 
+			}  else if (currentToken->name == VIRGULA) {
+				nextToken();
+			} else if (currentToken->name == PONTO_VIGULA) {
+				nextToken();
+			} else {
+				error("Syntax Error - Expected ',' or ';'.");
+			}
+		
+		} 
+	}
+	else if (currentToken->name == PONTO_VIGULA) {
+			nextToken();
+	} else {
+			error("Syntax Error - Expected ',' or ';'.");
 	}
 }
+
 
 // Type → char | int
 // Função para reconhecer tipos de função e declaração de variáveis
 void Parser::parseType()
 {
-	if (currentToken->name == CHAR_R || currentToken->name == INT)
-		nextToken();
-	else
-		error("Syntax Error - Expected int or char.");
+    std::cout << "[DEBUG] Parsing type at line: " << scanner->getLine() 
+              << " Current token: " << currentToken->name << std::endl;
+    
+    if (currentToken->name == CHAR_R || currentToken->name == INT) {
+        std::cout << "[DEBUG] Type found: " << currentToken->name << std::endl;
+        nextToken();
+    }
+    else if (currentToken->name == VOID) {
+        std::cout << "[DEBUG] Void type found: " << currentToken->name << std::endl;
+        nextToken();
+    }
+    else {
+			// error("Syntax Error - Expected int, char or void.");
+			nextToken();
+    }
 }
 
 // ParamTypes → void | Type ID([])?(,Type ID([])?)∗
 void Parser::parseParamTypes()
 {
-	if (currentToken->name == VOID) // ParamTypes → void
+	if (currentToken->name == VOID) {// ParamTypes → void
 		nextToken();
+		if (currentToken->name == PD) { // Apenas 'void)', sem parâmetros
+            std::cout << "[DEBUG] Function with void parameter type." << std::endl;
+            return;
+        } else {
+            error("Syntax Error - 'void' must be the only parameter type or part of the return type.");
+        }
+	}
 	else // ParamTypes → Type ID([])?(,Type ID([])?)∗
 	{
 		parseType();
@@ -105,7 +224,8 @@ void Parser::parseParamTypes()
 		if (currentToken->name == VIRGULA)
 		{
 			while (currentToken->name == VIRGULA)
-			{
+			{	
+				nextToken();
 				parseType();
 				expect(ID);
 				if (currentToken->name == CE)
@@ -209,8 +329,17 @@ void Parser::parseStatement()
 	else if (currentToken->name == PONTO_VIGULA) // ;
 	{
 		nextToken();
+	} else if (currentToken->name == CHAR_R || currentToken->name == INT) {
+		parseType();
+		parseVarDeclaration();
+		expect(PONTO_VIGULA);
+	} else if (currentToken->name == ID) {
+		parseAssign();
+		expect(PONTO_VIGULA);
+	} else if (currentToken->name == END_OF_FILE) {
+		return;
 	}
-	else
+	else 
 	{
 		error("Expected statement");
 	}
@@ -220,6 +349,8 @@ void Parser::parseStatement()
 void Parser::parseAssign()
 {
 	expect(ID);
+	std::string name = currentToken->lexeme;
+	checkSymbol(name, scanner->getLine());
 	if (currentToken->name == CE) // ID[ Expression ] = Expression
 	{
 		nextToken();
@@ -359,12 +490,13 @@ void Parser::parseLogOp()
 		error("Expected && or ||.");
 }
 
-// TODO
+void Parser::error(const std::string &msg) // Exibe uma mensagem de erro e lança uma exceção
+{
+    // Código ANSI para cor vermelha (para o erro)
+    const std::string RED = "\033[1;31m";
+    const std::string RESET = "\033[0m"; // Reseta a cor para o padrão
 
-// void
-// Parser::error(string str)
-// {
-// 	cout << "Linha " << scanner->getLine() << ": " << str << endl;
+    std::cerr << RED << "[ERROR] " << msg << " at line " << scanner->getLine() << RESET << std::endl;
+    throw std::runtime_error(msg);
+}
 
-// 	exit(EXIT_FAILURE);
-// }
