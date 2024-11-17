@@ -332,7 +332,7 @@ Token *Scanner::nextToken()
             }
             else
             {
-                msg = "Esperado &. Recebido: " + std::string(1, input[pos + 1]);
+                msg = "Esperado '&' Recebido: " + std::string(1, input[pos + 1]);
                 lexicalError(msg);
             }
             break;
@@ -346,7 +346,7 @@ Token *Scanner::nextToken()
             }
             else
             {
-                msg = "Esperado |. Recebido: " + std::string(1, input[pos + 1]);
+                msg = "Esperado '|' Recebido: " + std::string(1, input[pos + 1]);
                 lexicalError(msg);
             }
             break;
@@ -383,10 +383,11 @@ Token *Scanner::nextToken()
 
 void Scanner::lexicalError(string msg)
 {
-    cout << "Token mal formatado\n";
+    cout << "\n";
+    cout << "\033[1;31mToken mal formatado\n";
     // Mostrando aviso de erro com a posição do erro e o caractere que causou o erro na cor vermelha
-    cout << "Erro na posição " << pos << ": " << "\033[1;31m" << input[pos] << "\033[0m" << endl;
-    cout << "Tipo de erro: " << msg;
+    cout << "Erro na posição: " << pos << ", linha: " << line << " - token: " << input[pos] << endl;
+    cout << "Tipo de erro: " << msg << "\033[0m";
     exit(EXIT_FAILURE);
 }
 
