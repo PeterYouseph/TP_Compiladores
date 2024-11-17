@@ -41,8 +41,8 @@ int Scanner::getLine()
 // Método que retorna o próximo token da entrada
 Token *Scanner::nextToken()
 {
-    std::cout << "[DEBUG SCANNER] Current Char: '" << input[pos] << "' at pos: " << pos 
-              << ", line: " << line << std::endl;
+//    std::cout << "[DEBUG SCANNER] Current Char: '" << input[pos] << "' at pos: " << pos
+//              << ", line: " << line << std::endl;
     Token *tok;
     string lexeme;
     string l;
@@ -198,7 +198,7 @@ Token *Scanner::nextToken()
             if (reserved)
             {
                 // Se o lexema é uma palavra reservada, retorna o token correspondente
-                tok = new Token(reserved->token->name);
+                tok = new Token(reserved->token->name, reserved->token->attribute, reserved->token->lexeme);
                 // Pega o tipo de token da tabela
             }
             else

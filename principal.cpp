@@ -15,21 +15,16 @@ int main(int argc, char *argv[])
         cout << "Uso: ./compiler nome_arquivo.mj\n";
         return 1;
     }
-
-    // Cria o Scanner que irá ler o arquivo
-    Scanner *scanner = new Scanner(argv[1]);
-
     try
     {
         Parser* parser = new Parser(argv[1]);  // Cria uma instância do parser com o scanner
 
         parser->parseRun(); // Inicia a análise sintática completa do programa
         cout << "Análise sintática completa sem erros.\n";
+        delete parser;
+    } catch (const std::exception &e) {
+        return 1;
     }
-
-    // Deleta o scanner e o parser após o uso
-    delete parser;
-    delete scanner;
 
     // Libera o vetor alocado
     freeVetor();

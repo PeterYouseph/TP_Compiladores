@@ -39,6 +39,7 @@ enum Names
     CD,           // 24 - ]
     VIRGULA,      // 25 - ,
     PONTO_VIGULA, // 26 - ;
+    RESERVED,     // category of reserved words
     ELSE,         // 30 - else
     IF,           // 31 - if
     WHILE,        // 32 - while

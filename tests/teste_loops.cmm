@@ -1,4 +1,4 @@
-void main() {
+void main(void) {
     int i, soma;
     soma = 0;
 

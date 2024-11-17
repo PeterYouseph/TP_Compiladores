@@ -1,8 +1,8 @@
-int valor() {
+int valor(void) {
     return 42;
 }
 
-void main() {
+void main(void) {
     int resultado;
     resultado = valor();
 }
