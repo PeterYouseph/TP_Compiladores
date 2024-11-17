@@ -33,6 +33,6 @@ O compilador foi desenvolvido em ***C++*** e para compilar é necessário ter o 
     ```
 4. Execute o compilador:
     ```bash
-    ./compilador arquivo.cmm
+    ./compiler arquivo.cmm
     ```
 
