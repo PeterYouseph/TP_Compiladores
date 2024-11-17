@@ -15,6 +15,9 @@ Este projeto é um compilador para a linguagem ***"C--"***, desenvolvido como pa
 - Análise Sintática:
     - [x] Verificação de Sintaxe
     - [x] Tratamento de Erros
+- Tabela de Símbolos:
+    - [x] Armazenamento de Identificadores
+    - [x] Verificação de Declaração
 
 ## Instruções para Execução 🛠️
 O compilador foi desenvolvido em ***C++*** e para compilar é necessário ter o compilador ***g++*** instalado, que é encontrado na maioria das distribuições Linux. Para facilitar a compilação foi criado um arquivo ***Makefile***, que pode ser utilizado para compilar o projeto.
