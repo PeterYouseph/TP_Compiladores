@@ -400,8 +400,6 @@ void Parser::parseExpression() // Analisa as expressões
                 }
 			}
 			expect(PD);
-			parseExprLinha();
-
 		}
 		else if (match(CE)) // Expression → ID [ Expression ]
 		{
@@ -409,8 +407,8 @@ void Parser::parseExpression() // Analisa as expressões
 			nextToken();
 			parseExpression();
 			expect(CD);
-
 		}
+		parseExprLinha();
 	}
 	else if (match(PE)) // Expression →  (Expression)
 	{
