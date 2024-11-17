@@ -1,0 +1,12 @@
+int soma(int a, int b) {
+    return a + b;
+}
+
+int multiplica(int a, int b) {
+    return a * b;
+}
+
+void main(void) {
+    int resultado;
+    resultado = soma(5, 10) + multiplica(2, 3);
+}

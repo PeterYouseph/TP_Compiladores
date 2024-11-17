@@ -1,0 +1,13 @@
+void main(void) {
+    int x, y;
+    x = 10;
+    y = 20;
+
+    if (x > y) {
+        x = x - y;
+    } else if (x < y) {
+        x = y - x;
+    } else {
+        x = 0;
+    }
+}

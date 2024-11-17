@@ -1,3 +1,0 @@
-void main(void) {
-    x = 10; // Erro: 'x' não foi declarado
-}
