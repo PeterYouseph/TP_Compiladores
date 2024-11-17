@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
         Parser* parser = new Parser(argv[1]);  // Cria uma instância do parser com o scanner
 
         parser->parseRun(); // Inicia a análise sintática completa do programa
-        cout << "Análise sintática completa sem erros.\n";
         delete parser;
     } catch (const std::exception &e) {
         return 1;

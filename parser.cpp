@@ -69,6 +69,7 @@ void Parser::parseRun() // Inicía o programa
 		const std::string GREEN = "\033[1;32m";
 		const std::string RESET = "\033[0m"; // Reseta a cor para o padrão
 
+		std::cout << GREEN << "[SUCCESS] Compilation successful!" << RESET << std::endl;
 	}
 }
 
