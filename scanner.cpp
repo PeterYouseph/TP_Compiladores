@@ -36,7 +36,7 @@ Scanner::Scanner(string input, SymbolTable *symbolTable)
     // A próxima linha deve ser comentada posteriormente.
     // Ela é utilizada apenas para verificar se o
     // preenchimento de input foi feito corretamente.
-    cout << this->input;
+    // cout << this->input;
 }
 
 int Scanner::getLine()

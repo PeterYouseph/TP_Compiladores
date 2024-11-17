@@ -24,15 +24,6 @@ void Parser::initSymbolTable() {
 void Parser::nextToken()
 {
 	currentToken = scanner->nextToken(); // Obtém o próximo token
-	if (currentToken) {
-        std::cout << "[DEBUG] Next Token: " << currentToken->name 
-                  << " Lexeme: '" << currentToken->toString()
-                  << "' Line: " << scanner->getLine() << std::endl;
-//		cout << "Token: " << currentToken->name << " Lexeme: " << currentToken->lexeme << " Line: " << scanner->getLine() << endl;
-    } else {
-        std::cout << "[DEBUG] End of file reached." << std::endl;
-//		cout << "Token: " << END_OF_FILE << " Lexeme: " << "EOF" << " Line: " << scanner->getLine() << endl;
-    }
 }
 
 // Verifica se o token atual é igual ao token esperado
@@ -64,12 +55,12 @@ bool Parser::match(int t)
 // void Parser::error(string str)
 void Parser::parseRun() // Inicía o programa
 {
-	std::cout << "[DEBUG] Starting parseRun." << std::endl;
+
 
 	nextToken(); // Obtém o primeiro token
 
 	parseProgram(); // Inicia a análise sintática completa do programa
-	    std::cout << "[DEBUG] Parsing completed successfully!" << std::endl;
+
 
 	if (!match(END_OF_FILE)) { // Verifica se o token atual é o final do arquivo
 		error("Syntax Error - Expected end of file.");
@@ -77,7 +68,7 @@ void Parser::parseRun() // Inicía o programa
 		// Final de arquivo compilado com sucesso estilizado com cor verde (para sucesso)
 		const std::string GREEN = "\033[1;32m";
 		const std::string RESET = "\033[0m"; // Reseta a cor para o padrão
-		std::cout << GREEN << "[SUCCESS] Compilation successful!" << RESET << std::endl;
+
 	}
 }
 
@@ -88,21 +79,19 @@ void Parser::parseProgram()
 		parseFunction();
 	}
 	expect(END_OF_FILE);
-	std::cout << "[DEBUG] Program parsed successfully!" << std::endl;
-
 }
 
 // // Function → void ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗} | Type ID( ParamTypes ){(Type VarDeclaration(, VarDeclaration)∗;)∗ (Statement)∗}
 void Parser::parseFunction()
 {
-    std::cout << "[DEBUG] Parsing function at line: " << scanner->getLine() << std::endl;
+
 
     // Função de retorno VOID ou tipo específico
     if (match(VOID)) {
-        std::cout << "[DEBUG] Function return type: void" << std::endl;
+
         nextToken();
     } else if (match(CHAR_R) || match(INT)) {
-        std::cout << "[DEBUG] Parsing function return type..." << std::endl;
+
         parseType();
     } else {
         error("Syntax Error - Expected return type, got " + currentToken->toString());
@@ -110,7 +99,7 @@ void Parser::parseFunction()
 
     // Nome da função
     if (match(ID)) {
-        std::cout << "[DEBUG] Function name: " << currentToken->lexeme << std::endl;
+
         nextToken();
     } else {
         error("Syntax Error - Expected function name, got " + currentToken->toString());
@@ -138,7 +127,7 @@ void Parser::parseFunction()
 		}
     }
     expect(BD);  // Espera o fechamento da função
-    std::cout << "[DEBUG] Function parsed successfully!" << std::endl;
+
 }
 
 // VarDeclaration → ID[integerconstant]
@@ -146,13 +135,11 @@ void Parser::parseFunction()
 void Parser::parseVarDeclaration()
 {
     std::string name = currentToken->lexeme;
-    std::cout << "[DEBUG] Declaring variable: " << name 
-              << " at line: " << scanner->getLine() << std::endl;
     expect(ID);  // Espera pelo identificador da variável
     
     // Se for um array, lida com a declaração do tamanho do array
     if (match(CE)) {
-        std::cout << "[DEBUG] Declaring array size..." << std::endl;
+
         nextToken();
         expect(INTEGER);  // Espera um valor inteiro para o tamanho do array
         expect(CD);  // Fecha o colchete
@@ -162,11 +149,10 @@ void Parser::parseVarDeclaration()
 		while (!match(PONTO_VIGULA)) {
 			nextToken();
 			std::string name = currentToken->lexeme;
-			std::cout << "[DEBUG] Declaring variable: " << name 
-					  << " at line: " << scanner->getLine() << std::endl;
+
 			expect(ID);
 			if (match(CE)) {
-				std::cout << "[DEBUG] Declaring array size..." << std::endl;
+
 				nextToken();
 				expect(INTEGER);
 				expect(CD); 
@@ -192,15 +178,14 @@ void Parser::parseVarDeclaration()
 // Função para reconhecer tipos de função e declaração de variáveis
 void Parser::parseType()
 {
-    std::cout << "[DEBUG] Parsing type at line: " << scanner->getLine() 
-              << " Current token: " << currentToken->lexeme << std::endl;
+
     
     if (match(CHAR_R) || match(INT)) {
-        std::cout << "[DEBUG] Type found: " << currentToken->lexeme << std::endl;
+
         nextToken();
     }
     else if (match(VOID)) {
-        std::cout << "[DEBUG] Void type found: " << currentToken->lexeme << std::endl;
+
         nextToken();
     }
     else {
@@ -211,11 +196,11 @@ void Parser::parseType()
 // ParamTypes → void | Type ID([])?(,Type ID([])?)∗
 void Parser::parseParamTypes()
 {
-	std::cout << "[DEBUG] Parsing paramTypes." << std::endl;
+
 	if (match(VOID)) {// ParamTypes → void
 		nextToken();
 		if (match(PD)) { // Apenas 'void)', sem parâmetros
-            std::cout << "[DEBUG] Function with void parameter type." << std::endl;
+
             return;
         } else {
             error("Syntax Error - 'void' must be the only parameter type or part of the return type.");
@@ -249,7 +234,7 @@ void Parser::parseParamTypes()
 // Statement → if ( Expression ) Statement (else Statement)? | while ( Expression ) Statement | for ( (Assign)?;(Expression)?;(Assign)? ) Statement | return (Expression)? | Assign ;
 void Parser::parseStatement()
 {
-  	cout << "[DEBUG] Parsing statement." << std::endl;
+
 	if (match(IF)) // if ( Expression ) Statement (else Statement)?
 	{
 		nextToken();
@@ -381,30 +366,30 @@ void Parser::parseAssign()
 // Expression → ID[Expr]
 void Parser::parseExpression() // Analisa as expressões
 {
-	cout << "parseExpression with:" + currentToken->toString() << endl;
+
 	if (match(MINUS)) // Expression → - Expr Expr'
 	{
-		cout << "getting - Expr" << endl;
+
 		nextToken();
 		parseExpression();
 		parseExprLinha();
-		cout << "got - Expr" << endl;
+
 	}
 	else if (match(NOT)) // Expression → ! Expr Expr'
 	{
-		cout << "getting ! Expr" << endl;
+
 		nextToken();
 		parseExpression();
 		parseExprLinha();
-		cout << "got ! Expr" << endl;
+
 	}
 	else if (match(ID)) // Expression → ID(((Expression ( , Expression)∗)?)|[ Expression ])?
 	{
-        cout << "expression with id " << currentToken->toString() << endl;
+
 		nextToken();
 		if (match(PE)) // Expression → ID ()
 		{
-			cout << "expression has parantesis " << currentToken->toString() << endl;
+
 			nextToken();
 			if (!match(PD)) // Expression → ID ( Expression )
 			{
@@ -416,46 +401,46 @@ void Parser::parseExpression() // Analisa as expressões
 			}
 			expect(PD);
 			parseExprLinha();
-			cout << "got exp with id " << endl;
+
 		}
 		else if (match(CE)) // Expression → ID [ Expression ]
 		{
-			cout << "getting [expression]" << endl;
+
 			nextToken();
 			parseExpression();
 			expect(CD);
-			cout << "got [expression]" << endl;
+
 		}
 	}
 	else if (match(PE)) // Expression →  (Expression)
 	{
-		cout << "getting (expression)" << endl;
+
 		nextToken();
 		parseExpression();
 		expect(PD);
 		parseExprLinha();
-		cout << "got (expression)" << endl;
+
 	}
 	else if (match(INTEGER)) // Expression → integerconstant
 	{
-		cout << "getting int" << endl;
+
 		nextToken();
 		parseExprLinha();
-		cout << "got int" << endl;
+
 	}
 	else if (match(CHAR)) // Expression → charconstant
 	{
-		cout << "getting char" << endl;
+
 		nextToken();
 		parseExprLinha();
-		cout << "got char" << endl;
+
 	}
 	else if (match(STRING)) // Expression → stringconstant
 	{
-		cout << "getting string" << endl;
+
 		nextToken();
 		parseExprLinha();
-        cout << "got string" << endl;
+
 	} else {
           error("Expected expression, but got '" + currentToken->toString() + "'");
 	}
@@ -467,24 +452,24 @@ void Parser::parseExpression() // Analisa as expressões
 // ExpreLinha -> ε
 void Parser::parseExprLinha()
 {
-  cout << "parseExprLinha with:" + currentToken->lexeme << endl;
+
 	if (match(OP))
 	{
-		cout << "parseExprLinha binOp" << endl;
+
 		parseBinOp();
 		parseExpression();
 		parseExprLinha();
 	}
 	else if (match(RELOP))
 	{
-		cout << "parseExprLinha relOp" << endl;
+
 		parseRelOp();
 		parseExpression();
 		parseExprLinha();
 	}
 	else if (match(LOGOP))
 	{
-		cout << "parseExprLinha logOp" << endl;
+
 		parseLogOp();
 		parseExpression();
 		parseExprLinha();
