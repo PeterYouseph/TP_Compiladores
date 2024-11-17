@@ -1,0 +1,4 @@
+void main(void) {
+    int resultado;
+    resultado = (10 + 5) * (20 - 15) / 5 && (10 > 5);
+}

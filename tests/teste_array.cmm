@@ -1,0 +1,8 @@
+void main(void) {
+    int valores[5];
+    int i;
+
+    for (i = 0; i < 5; i = i + 1) {
+        valores[i] = i * 2;
+    }
+}

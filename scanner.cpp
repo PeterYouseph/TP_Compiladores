@@ -1,7 +1,7 @@
 #include "scanner.h"
 
 // Construtor
-Scanner::Scanner(string input)
+Scanner::Scanner(string input, SymbolTable *symbolTable)
 {
     /*this->input = input;
     cout << "Entrada: " << input << endl
@@ -9,6 +9,9 @@ Scanner::Scanner(string input)
          << input.length() << endl;*/
     pos = 0;
     line = 1;
+    st = symbolTable;
+
+    // st = table;
 
     ifstream inputFile(input, ios::in);
     string line;
@@ -21,13 +24,19 @@ Scanner::Scanner(string input)
         }
         inputFile.close();
     }
-    else
-        cout << "Unable to open file\n";
+    else {
+        // Código ANSI para cor vermelha (para o erro)
+        std::string RED = "\033[1;31m";
+        const std::string RESET = "\033[0m"; // Reseta a cor para o padrão
 
+        std::cerr << RED << "[ERROR] " << "Could not open input file" << RESET << std::endl;
+
+        throw std::runtime_error("Could not open input file");
+    }
     // A próxima linha deve ser comentada posteriormente.
     // Ela é utilizada apenas para verificar se o
     // preenchimento de input foi feito corretamente.
-    cout << this->input;
+    // cout << this->input;
 }
 
 int Scanner::getLine()
@@ -38,6 +47,8 @@ int Scanner::getLine()
 // Método que retorna o próximo token da entrada
 Token *Scanner::nextToken()
 {
+//    std::cout << "[DEBUG SCANNER] Current Char: '" << input[pos] << "' at pos: " << pos
+//              << ", line: " << line << std::endl;
     Token *tok;
     string lexeme;
     string l;
@@ -48,14 +59,14 @@ Token *Scanner::nextToken()
     {
         switch (state)
         {
-        case 0:
+        case 0: {
             lexeme = "";            // Inicializa o lexema como uma string vazia
             if (input[pos] == '\0') // Verifica se chegou ao final do arquivo, retornando o token de END_OF_FILE
             {
                 tok = new Token(END_OF_FILE, UNDEF);
                 return tok;
             }
-            else if (isalpha(input[pos]) || input[pos] == '_') // Verifica se o caractere é uma letra ou um underline
+            else if (isalpha(input[pos])) // Verifica se o caractere é uma letra ou um underline
                 state = 1;
             else if (isdigit(input[pos])) // Verifica se o caractere é um dígito
                 state = 2;
@@ -91,6 +102,8 @@ Token *Scanner::nextToken()
                 state = 9;
             else if (input[pos] == '|') // Verifica se o caractere é um operador de OR
                 state = 10;
+            else if (input[pos] == '\"') // Verifica se o caractere é aspas duplas
+                state = 12;
             else if (input[pos] == '(') // Verifica se o caractere é um parêntese esquerdo
             {
                 tok = new Token(SEP, PE, "(");
@@ -141,7 +154,7 @@ Token *Scanner::nextToken()
             }
             else if (input[pos] == '/' && input[pos + 1] == '/') // Verifica se o caractere é uma barra dupla (comentário de linha)
             {
-                while (input[pos] != '\n' && input[pos] != '\0' && pos < input.length())
+                while (input[pos] != '\n' && input[pos] != '\0' && pos < static_cast<std::string::size_type>(input.length()))
                     pos++;
             }
             else if (input[pos] == '/' && input[pos + 1] == '*') // Verifica se o caractere é uma barra asterisco (comentário em bloco)
@@ -149,7 +162,7 @@ Token *Scanner::nextToken()
                 pos += 2; // Avança após '/*'
                 while (!(input[pos] == '*' && input[pos + 1] == '/'))
                 {
-                    if (input[pos] == '\n' || input[pos] == '\0' || pos >= input.length())
+                    if (input[pos] == '\n' || input[pos] == '\0' || pos >= static_cast<std::string::size_type>(input.length()))
                         line++; // Conta novas linhas
                     pos++;
                 }
@@ -168,7 +181,7 @@ Token *Scanner::nextToken()
                 pos++;      // Avança para o próximo caractere
                 state = 0;  // Retorna ao estado inicial para buscar o próximo token
             }
-            else if (pos >= input.length() || input[pos] == '\0') // Verifica se chegou ao final do arquivo
+            else if (pos >= static_cast<std::string::size_type>(input.length())|| input[pos] == '\0') // Verifica se chegou ao final do arquivo
             {
                 return new Token(END_OF_FILE, UNDEF);
             }
@@ -177,8 +190,10 @@ Token *Scanner::nextToken()
                 pos++; // Avança para o próximo caractere se for inválido no estado atual
             }
             break;
+        }
 
         case 1: // Identificador (ID)
+        {
             lexeme += input[pos];
             pos++;
             while (isalnum(input[pos]) || input[pos] == '_')
@@ -186,10 +201,24 @@ Token *Scanner::nextToken()
                 lexeme += input[pos];
                 pos++;
             }
-            tok = new Token(ID, UNDEF, lexeme); // Cria um novo token com o lexema
+            STEntry* reserved = st->get(lexeme);
+            // Verificar se o lexema é uma palavra reservada
+            if (reserved)
+            {
+                // Se o lexema é uma palavra reservada, retorna o token correspondente
+                tok = new Token(reserved->token->name, reserved->token->attribute, reserved->token->lexeme);
+                // Pega o tipo de token da tabela
+            }
+            else
+            {
+                // Caso contrário, trata como um identificador (ID)
+                tok = new Token(ID, UNDEF, lexeme); // Cria o token como identificador
+            }
             return tok;
+        }
 
         case 2: // Inteiro (INTEGER)
+        {
             lexeme += input[pos];
             pos++;
             while (isdigit(input[pos]))
@@ -199,39 +228,32 @@ Token *Scanner::nextToken()
             }
             tok = new Token(INTEGER, stoi(lexeme)); // Aqui converte o lexeme para um inteiro
             return tok;
+        }
 
-        case 3:
+        case 3: {
             pos++;       // Avança para o próximo caractere após a aspas simples
             lexeme = ""; // Limpa o lexema antes de adicionar
-            if (input[pos] == '\\')
-            { // Caractere de escape
+            if (input[pos] == '\\') { // Caractere de escape
                 lexeme += input[pos];
                 pos++;
                 lexeme += input[pos];
-            }
-            else if (isprint(input[pos]) && input[pos] != '\'' && input[pos] != '\\')
-            {
+            } else if (isprint(input[pos]) && input[pos] != '\'' && input[pos] != '\\') {
                 lexeme += input[pos];
-            }
-            else
-            {
+            } else {
                 lexicalError("Caractere não ASCII ou inválido para CHAR");
             }
             pos++; // Move após o caractere
-            if (input[pos] == '\'')
-            {
+            if (input[pos] == '\'') {
                 pos++;
                 tok = new Token(CHAR, lexeme[0]); // Cria um novo token com o caractere - lexeme[0] é o caractere em si
 
                 return tok;
-            }
-            else
-            {
+            } else {
                 lexicalError("Esperado aspas simples após caractere.");
             }
             break;
-
-        case 4:
+        }
+        case 4: {
             if (input[pos] == '\'')
             {
                 tok = new Token(CHAR, '\0'); // Cria um novo token com o caractere nulo
@@ -244,6 +266,7 @@ Token *Scanner::nextToken()
                 lexicalError(msg);
             }
             break;
+        }
 
         case 5:
             if (input[pos + 1] == '=')
@@ -260,7 +283,7 @@ Token *Scanner::nextToken()
             return tok;
 
         case 6:
-            if (pos + 1 < input.length() && input[pos + 1] == '=')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '=')
             {
                 tok = new Token(RELOP, LE, "<=");
                 pos += 2; // Avança após '<='
@@ -288,7 +311,7 @@ Token *Scanner::nextToken()
             }
 
         case 8:
-            if (pos + 1 < input.length() && input[pos + 1] == '=')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '=')
             {
                 tok = new Token(RELOP, DIF, "!=");
                 pos += 2; // Avança após '!='
@@ -296,35 +319,34 @@ Token *Scanner::nextToken()
             else
             {
                 tok = new Token(OP, NOT, "!");
-                tok->lexeme = "!"; // Adiciona lexema
                 pos++;
             }
             return tok;
 
         case 9:
-            if (pos + 1 < input.length() && input[pos + 1] == '&')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '&')
             {
-                tok = new Token(OP, AND, "&&");
+                tok = new Token(LOGOP, AND, "&&");
                 pos += 2; // Avança após '&&'
                 return tok;
             }
             else
             {
-                msg = "Esperado &. Recebido: " + std::string(1, input[pos + 1]);
+                msg = "Esperado '&' Recebido: " + std::string(1, input[pos + 1]);
                 lexicalError(msg);
             }
             break;
 
         case 10:
-            if (pos + 1 < input.length() && input[pos + 1] == '|')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '|')
             {
-                tok = new Token(OP, OR, "||");
+                tok = new Token(LOGOP, OR, "||");
                 pos += 2; // Avança após '||'
                 return tok;
             }
             else
             {
-                msg = "Esperado |. Recebido: " + std::string(1, input[pos + 1]);
+                msg = "Esperado '|' Recebido: " + std::string(1, input[pos + 1]);
                 lexicalError(msg);
             }
             break;
@@ -335,16 +357,37 @@ Token *Scanner::nextToken()
             pos++;
             state = 0; // Volta para o estado inicial
             break;
+        case 12:
+            pos++;       // Avança para o próximo caractere após a aspas duplas
+            lexeme = ""; // Limpa o lexema antes de adicionar
+            while(isprint(input[pos]) && input[pos] != '\"') {
+                lexeme += input[pos];
+                pos++;
+            }
+            if (input[pos] == '\"')
+            {
+                pos++;
+                tok = new Token(STRING, UNDEF, lexeme); // Cria um novo token com o caractere - lexeme[0] é o caractere em si
+
+                return tok;
+            }
+            else
+            {
+                lexicalError("Esperado aspas duplas após string.");
+            }
+            break;
+        default: lexicalError("unexpected case");
         }
     }
 } // Fim nextToken
 
 void Scanner::lexicalError(string msg)
 {
-    cout << "Token mal formatado\n";
+    cout << "\n";
+    cout << "\033[1;31mToken mal formatado\n";
     // Mostrando aviso de erro com a posição do erro e o caractere que causou o erro na cor vermelha
-    cout << "Erro na posição " << pos << ": " << "\033[1;31m" << input[pos] << "\033[0m" << endl;
-    cout << "Tipo de erro: " << msg;
+    cout << "Erro na posição: " << pos << ", linha: " << line << " - token: " << input[pos] << endl;
+    cout << "Tipo de erro: " << msg << "\033[0m";
     exit(EXIT_FAILURE);
 }
 

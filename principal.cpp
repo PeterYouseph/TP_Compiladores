@@ -1,5 +1,6 @@
 #include "scanner.h"
 #include "token.h"
+#include "parser.h"  // Inclua o header do parser
 
 string *vet;
 
@@ -14,24 +15,17 @@ int main(int argc, char *argv[])
         cout << "Uso: ./compiler nome_arquivo.mj\n";
         return 1;
     }
-
-    // getline(cin, input);
-
-    Scanner *scanner = new Scanner(argv[1]);
-
-    allocVetor();
-
-    Token *t;
-
-    do
+    try
     {
-        t = scanner->nextToken();
-        // cout << t->name << " ";
-        print(t);
-    } while (t->name != END_OF_FILE);
+        Parser* parser = new Parser(argv[1]);  // Cria uma instância do parser com o scanner
 
-    delete scanner;
+        parser->parseRun(); // Inicia a análise sintática completa do programa
+        delete parser;
+    } catch (const std::exception &e) {
+        return 1;
+    }
 
+    // Libera o vetor alocado
     freeVetor();
 
     return 0;
@@ -40,7 +34,7 @@ int main(int argc, char *argv[])
 // Acrescentar os vetores dos demais token
 void allocVetor()
 {
-    vet = new string[27]; // Ajustado para 27 tokens
+    vet = new string[35]; // Ajustado para 35 tokens
 
     vet[0] = "UNDEF";         // 0
     vet[1] = "ID";            // 1
@@ -69,6 +63,11 @@ void allocVetor()
     vet[24] = "CD";           // 24
     vet[25] = "VIRGULA";      // 25
     vet[26] = "PONTO_VIGULA"; // 26
+    vet[30] = "ELSE";         // 30
+    vet[31] = "IF";           // 31
+    vet[32] = "WHILE";        // 32
+    vet[33] = "FOR";          // 33
+    vet[34] = "INT";          // 34
 }
 
 void freeVetor()

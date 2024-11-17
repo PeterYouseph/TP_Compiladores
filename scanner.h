@@ -2,18 +2,24 @@
 #define SCANNER_H
 
 #include <fstream>
+#include <unordered_map>
+#include <string>
+
+#include "symboltable.h"
 #include "token.h"
 
 class Scanner
 {
 private:
     std::string input; // Armazena o texto de entrada
-    int pos;           // Posição atual
-    int line;          // Linha atual
+    std::string::size_type pos;
+  // Posição atual
+    int line; // Linha atual
+    SymbolTable* st;
 
 public:
     // Construtor
-    Scanner(std::string);
+    Scanner(std::string, SymbolTable*);
 
     int getLine();
 
