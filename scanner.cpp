@@ -24,9 +24,15 @@ Scanner::Scanner(string input, SymbolTable *symbolTable)
         }
         inputFile.close();
     }
-    else
-        cout << "Unable to open file\n";
+    else {
+        // Código ANSI para cor vermelha (para o erro)
+        std::string RED = "\033[1;31m";
+        const std::string RESET = "\033[0m"; // Reseta a cor para o padrão
 
+        std::cerr << RED << "[ERROR] " << "Could not open input file" << RESET << std::endl;
+
+        throw std::runtime_error("Could not open input file");
+    }
     // A próxima linha deve ser comentada posteriormente.
     // Ela é utilizada apenas para verificar se o
     // preenchimento de input foi feito corretamente.
@@ -96,6 +102,8 @@ Token *Scanner::nextToken()
                 state = 9;
             else if (input[pos] == '|') // Verifica se o caractere é um operador de OR
                 state = 10;
+            else if (input[pos] == '\"') // Verifica se o caractere é aspas duplas
+                state = 12;
             else if (input[pos] == '(') // Verifica se o caractere é um parêntese esquerdo
             {
                 tok = new Token(SEP, PE, "(");
@@ -222,38 +230,30 @@ Token *Scanner::nextToken()
             return tok;
         }
 
-        case 3:
+        case 3: {
             pos++;       // Avança para o próximo caractere após a aspas simples
             lexeme = ""; // Limpa o lexema antes de adicionar
-            if (input[pos] == '\\')
-            { // Caractere de escape
+            if (input[pos] == '\\') { // Caractere de escape
                 lexeme += input[pos];
                 pos++;
                 lexeme += input[pos];
-            }
-            else if (isprint(input[pos]) && input[pos] != '\'' && input[pos] != '\\')
-            {
+            } else if (isprint(input[pos]) && input[pos] != '\'' && input[pos] != '\\') {
                 lexeme += input[pos];
-            }
-            else
-            {
+            } else {
                 lexicalError("Caractere não ASCII ou inválido para CHAR");
             }
             pos++; // Move após o caractere
-            if (input[pos] == '\'')
-            {
+            if (input[pos] == '\'') {
                 pos++;
                 tok = new Token(CHAR, lexeme[0]); // Cria um novo token com o caractere - lexeme[0] é o caractere em si
 
                 return tok;
-            }
-            else
-            {
+            } else {
                 lexicalError("Esperado aspas simples após caractere.");
             }
             break;
-
-        case 4:
+        }
+        case 4: {
             if (input[pos] == '\'')
             {
                 tok = new Token(CHAR, '\0'); // Cria um novo token com o caractere nulo
@@ -266,6 +266,7 @@ Token *Scanner::nextToken()
                 lexicalError(msg);
             }
             break;
+        }
 
         case 5:
             if (input[pos + 1] == '=')
@@ -318,7 +319,6 @@ Token *Scanner::nextToken()
             else
             {
                 tok = new Token(OP, NOT, "!");
-                tok->lexeme = "!"; // Adiciona lexema
                 pos++;
             }
             return tok;
@@ -356,6 +356,25 @@ Token *Scanner::nextToken()
                 line++;
             pos++;
             state = 0; // Volta para o estado inicial
+            break;
+        case 12:
+            pos++;       // Avança para o próximo caractere após a aspas duplas
+            lexeme = ""; // Limpa o lexema antes de adicionar
+            while(isprint(input[pos]) && input[pos] != '\"') {
+                lexeme += input[pos];
+                pos++;
+            }
+            if (input[pos] == '\"')
+            {
+                pos++;
+                tok = new Token(STRING, UNDEF, lexeme); // Cria um novo token com o caractere - lexeme[0] é o caractere em si
+
+                return tok;
+            }
+            else
+            {
+                lexicalError("Esperado aspas duplas após string.");
+            }
             break;
         default: lexicalError("unexpected case");
         }

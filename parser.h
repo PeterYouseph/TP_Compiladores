@@ -28,7 +28,6 @@ private:
 	void parseRelOp();			// RelOp → == | != | <= | < | >= | >
 	void parseLogOp();			// LogOp → && | ||
 	void error(const std::string &msg); // Exibe uma mensagem de erro e lança uma exceção
-	std::string tokenIdentifier();
 
 public:
 	void parseRun(); // Inicía o programa

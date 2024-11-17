@@ -26,7 +26,7 @@ void Parser::nextToken()
 	currentToken = scanner->nextToken(); // Obtém o próximo token
 	if (currentToken) {
         std::cout << "[DEBUG] Next Token: " << currentToken->name 
-                  << " Lexeme: '" << tokenIdentifier()
+                  << " Lexeme: '" << currentToken->toString()
                   << "' Line: " << scanner->getLine() << std::endl;
 //		cout << "Token: " << currentToken->name << " Lexeme: " << currentToken->lexeme << " Line: " << scanner->getLine() << endl;
     } else {
@@ -105,7 +105,7 @@ void Parser::parseFunction()
         std::cout << "[DEBUG] Parsing function return type..." << std::endl;
         parseType();
     } else {
-        error("Syntax Error - Expected return type, got " + tokenIdentifier());
+        error("Syntax Error - Expected return type, got " + currentToken->toString());
     }
 
     // Nome da função
@@ -113,7 +113,7 @@ void Parser::parseFunction()
         std::cout << "[DEBUG] Function name: " << currentToken->lexeme << std::endl;
         nextToken();
     } else {
-        error("Syntax Error - Expected function name, got " + tokenIdentifier());
+        error("Syntax Error - Expected function name, got " + currentToken->toString());
     }
 
     expect(PE); // Espera o '(' de parâmetros
@@ -134,7 +134,7 @@ void Parser::parseFunction()
         } else if (match(ID) || match(RESERVED)) {
 			parseStatement();  // Lida com as instruções
 		} else {
-			error("Syntax Error - Expected variable declaration or statement, got " + tokenIdentifier());
+			error("Syntax Error - Expected variable declaration or statement, got " + currentToken->toString());
 		}
     }
     expect(BD);  // Espera o fechamento da função
@@ -370,70 +370,94 @@ void Parser::parseAssign()
 	parseExpression();
 }
 
-// Expression → - Expression
-// Expression → ! Expression
-// Expression →  Expression BinOp Expression
-// Expression →
-// Expression →
+// Expression → - Expr Expr'
+// Expression → ! Expr Expr'
+// Expression → integetConst
+// Expression → ( Expr )
+// Expression → ID
+// Expression → ID()
+// Expression → ID(Expr)
+// Expression → ID(Expr, Expr)
+// Expression → ID[Expr]
 void Parser::parseExpression() // Analisa as expressões
 {
-	cout << "parseExpression with:" + currentToken->lexeme << endl;
-	if (match(MINUS)) // Expression → - Expression
+	cout << "parseExpression with:" + currentToken->toString() << endl;
+	if (match(MINUS)) // Expression → - Expr Expr'
 	{
+		cout << "getting - Expr" << endl;
 		nextToken();
 		parseExpression();
 		parseExprLinha();
+		cout << "got - Expr" << endl;
 	}
-	else if (match(NOT)) // Expression → ! Expression
+	else if (match(NOT)) // Expression → ! Expr Expr'
 	{
+		cout << "getting ! Expr" << endl;
 		nextToken();
 		parseExpression();
 		parseExprLinha();
+		cout << "got ! Expr" << endl;
 	}
-	// TODO E BinOp E | E RelOp E | E LogOp E
 	else if (match(ID)) // Expression → ID(((Expression ( , Expression)∗)?)|[ Expression ])?
 	{
+        cout << "expression with id " << currentToken->toString() << endl;
 		nextToken();
 		if (match(PE)) // Expression → ID ()
 		{
+			cout << "expression has parantesis " << currentToken->toString() << endl;
 			nextToken();
 			if (!match(PD)) // Expression → ID ( Expression )
 			{
 				parseExpression();
-				if (match(VIRGULA)) // Expression → ID ( Expression, Expression )
+				while (match(VIRGULA)) {// Expression → ID ( Expression (, Expression)* )
+                	nextToken();
 					parseExpression();
+                }
 			}
 			expect(PD);
+			parseExprLinha();
+			cout << "got exp with id " << endl;
 		}
 		else if (match(CE)) // Expression → ID [ Expression ]
 		{
+			cout << "getting [expression]" << endl;
 			nextToken();
 			parseExpression();
 			expect(CD);
+			cout << "got [expression]" << endl;
 		}
-		parseExprLinha();
 	}
 	else if (match(PE)) // Expression →  (Expression)
 	{
+		cout << "getting (expression)" << endl;
 		nextToken();
 		parseExpression();
 		expect(PD);
 		parseExprLinha();
+		cout << "got (expression)" << endl;
 	}
 	else if (match(INTEGER)) // Expression → integerconstant
 	{
+		cout << "getting int" << endl;
 		nextToken();
 		parseExprLinha();
+		cout << "got int" << endl;
 	}
 	else if (match(CHAR)) // Expression → charconstant
 	{
+		cout << "getting char" << endl;
 		nextToken();
 		parseExprLinha();
+		cout << "got char" << endl;
 	}
 	else if (match(STRING)) // Expression → stringconstant
 	{
+		cout << "getting string" << endl;
 		nextToken();
 		parseExprLinha();
+        cout << "got string" << endl;
+	} else {
+          error("Expected expression, but got '" + currentToken->toString() + "'");
 	}
 }
 
@@ -446,18 +470,21 @@ void Parser::parseExprLinha()
   cout << "parseExprLinha with:" + currentToken->lexeme << endl;
 	if (match(OP))
 	{
+		cout << "parseExprLinha binOp" << endl;
 		parseBinOp();
 		parseExpression();
 		parseExprLinha();
 	}
 	else if (match(RELOP))
 	{
+		cout << "parseExprLinha relOp" << endl;
 		parseRelOp();
 		parseExpression();
 		parseExprLinha();
 	}
 	else if (match(LOGOP))
 	{
+		cout << "parseExprLinha logOp" << endl;
 		parseLogOp();
 		parseExpression();
 		parseExprLinha();
@@ -507,10 +534,6 @@ void Parser::parseLogOp()
 		nextToken();
 	else
 		error("Expected && or ||.");
-}
-
-std::string Parser::tokenIdentifier() {
-  return currentToken->lexeme + " (" +  std::to_string(currentToken->name) + ") - " + std::to_string(currentToken->attribute);
 }
 
 void Parser::error(const std::string &msg) // Exibe uma mensagem de erro e lança uma exceção
