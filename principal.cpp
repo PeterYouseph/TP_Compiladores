@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        cout << "Uso: ./compiler nome_arquivo.mj\n";
+        cout << "Uso: ./compiler nome_arquivo.mm\n";
         return 1;
     }
     try
