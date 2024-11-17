@@ -146,7 +146,7 @@ Token *Scanner::nextToken()
             }
             else if (input[pos] == '/' && input[pos + 1] == '/') // Verifica se o caractere é uma barra dupla (comentário de linha)
             {
-                while (input[pos] != '\n' && input[pos] != '\0' && pos < input.length())
+                while (input[pos] != '\n' && input[pos] != '\0' && pos < static_cast<std::string::size_type>(input.length()))
                     pos++;
             }
             else if (input[pos] == '/' && input[pos + 1] == '*') // Verifica se o caractere é uma barra asterisco (comentário em bloco)
@@ -154,7 +154,7 @@ Token *Scanner::nextToken()
                 pos += 2; // Avança após '/*'
                 while (!(input[pos] == '*' && input[pos + 1] == '/'))
                 {
-                    if (input[pos] == '\n' || input[pos] == '\0' || pos >= input.length())
+                    if (input[pos] == '\n' || input[pos] == '\0' || pos >= static_cast<std::string::size_type>(input.length()))
                         line++; // Conta novas linhas
                     pos++;
                 }
@@ -173,7 +173,7 @@ Token *Scanner::nextToken()
                 pos++;      // Avança para o próximo caractere
                 state = 0;  // Retorna ao estado inicial para buscar o próximo token
             }
-            else if (pos >= input.length() || input[pos] == '\0') // Verifica se chegou ao final do arquivo
+            else if (pos >= static_cast<std::string::size_type>(input.length())|| input[pos] == '\0') // Verifica se chegou ao final do arquivo
             {
                 return new Token(END_OF_FILE, UNDEF);
             }
@@ -282,7 +282,7 @@ Token *Scanner::nextToken()
             return tok;
 
         case 6:
-            if (pos + 1 < input.length() && input[pos + 1] == '=')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '=')
             {
                 tok = new Token(RELOP, LE, "<=");
                 pos += 2; // Avança após '<='
@@ -310,7 +310,7 @@ Token *Scanner::nextToken()
             }
 
         case 8:
-            if (pos + 1 < input.length() && input[pos + 1] == '=')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '=')
             {
                 tok = new Token(RELOP, DIF, "!=");
                 pos += 2; // Avança após '!='
@@ -324,7 +324,7 @@ Token *Scanner::nextToken()
             return tok;
 
         case 9:
-            if (pos + 1 < input.length() && input[pos + 1] == '&')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '&')
             {
                 tok = new Token(LOGOP, AND, "&&");
                 pos += 2; // Avança após '&&'
@@ -338,7 +338,7 @@ Token *Scanner::nextToken()
             break;
 
         case 10:
-            if (pos + 1 < input.length() && input[pos + 1] == '|')
+            if (pos + 1 < static_cast<std::string::size_type>(input.length()) && input[pos + 1] == '|')
             {
                 tok = new Token(LOGOP, OR, "||");
                 pos += 2; // Avança após '||'

@@ -12,7 +12,8 @@ class Scanner
 {
 private:
     std::string input; // Armazena o texto de entrada
-    int pos;  // Posição atual
+    std::string::size_type pos;
+  // Posição atual
     int line; // Linha atual
     SymbolTable* st;
 
